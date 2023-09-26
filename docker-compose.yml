@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+  caddy:
+    build: .
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - net1
+      - net2
+
+  vhost1:
+    image: httpd
+    container_name: vhost1
+    networks:
+      - net1
+  
+  vhost2:
+    image: httpd
+    container_name: vhost2
+    networks:
+      - net2
+
+networks:
+  net1:
+  net2:
+
+
+
+
