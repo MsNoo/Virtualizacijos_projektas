@@ -1,0 +1,7 @@
+FROM python:3.9.13-alpine3.15
+
+RUN pip3 install flask-restful 
+
+COPY ./vhostbackup/server.py /tmp/server.py
+
+CMD python /tmp/server.py

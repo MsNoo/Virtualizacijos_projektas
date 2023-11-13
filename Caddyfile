@@ -16,3 +16,10 @@ http://vhost2.localhost {
     }
     reverse_proxy vhost2:80
 }
+
+http://vhostbackup.localhost {
+    basicauth {
+        admin $2a$14$BARKRbCzMKoKaG.dgkOTaOGY9TMrBt33v5ffELbKruBfQs.9fESbW
+    }
+    reverse_proxy vhostbackup:80
+}
