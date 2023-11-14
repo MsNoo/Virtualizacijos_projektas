@@ -29,6 +29,7 @@ services:
       dockerfile: Dockerfile-vhostbackup
     volumes:
       - DockerBackup:/opt/backup
+      - /var/run/docker.sock.raw:/var/run/docker.sock
     container_name: vhostbackup
     restart: unless-stopped
     networks:
