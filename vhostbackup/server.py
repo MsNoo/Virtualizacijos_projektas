@@ -1,4 +1,4 @@
-# Server used for managing backups
+# Server used for managing backups and restores
 # 
 # To view backups access: http://vhostbackup.localhost/
 # To create a backup access: http://vhostbackup.localhost/backup
