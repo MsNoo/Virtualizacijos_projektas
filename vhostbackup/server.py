@@ -118,14 +118,12 @@ def restoreBackup():
     statusReason = ""
     statusReasonAdditional = ""
     statusNoErrors = True
-    
-    restoreContainer("", "", "vhost1")
 
     # Runs all backup codes
     # Calls ontainer backup code and logs status of it
-    restoreBackupID = "20231115183718429291"
-    restoreBackupTimestamp = "2023-11-15 18:37:18"
-    restoreContainerList = ["vhost1", "vhost2"]
+    restoreBackupID = "20231117131133486028"
+    restoreBackupTimestamp = "2023-11-17 13:11:33"
+    restoreContainerList = ["vhost1"]
 
     for name in restoreContainerList:
         containerRestoreDone = restoreContainer(restoreBackupID, restoreBackupTimestamp, name)
