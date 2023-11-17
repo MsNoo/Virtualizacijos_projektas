@@ -23,10 +23,23 @@ services:
     networks:
       - net2
 
+  vhostbackup:
+    build:
+      context: .
+      dockerfile: Dockerfile-vhostbackup
+    volumes:
+      - DockerBackup:/opt/backup
+      - /var/run/docker.sock.raw:/var/run/docker.sock
+    container_name: vhostbackup
+    restart: unless-stopped
+    networks:
+      - net1
+      - net2
+
 networks:
   net1:
   net2:
 
-
-
+volumes:
+  DockerBackup:
 
