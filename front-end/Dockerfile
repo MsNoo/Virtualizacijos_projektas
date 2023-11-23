@@ -9,6 +9,8 @@ RUN sh -c 'npm i --omit=dev'
 
 RUN sh -c 'npm run build'
 
+# TODO: rm *json, node_modules
+
 FROM nginx:1.22.1-alpine as prod-stage
 
 COPY --from=build-stage /app/build /usr/share/nginx/html

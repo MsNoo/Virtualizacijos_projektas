@@ -20,11 +20,12 @@ export const App = () => {
               "linear-gradient(90deg, rgba(202,105,222,1) 0%, rgba(119,222,221,1) 35%, rgba(122,212,155,1) 100%)",
           }}
         >
-          Viešoji failų talpykla
+          Slaptoji Failų Talpykla
         </h1>
 
         <h2 style={{ marginBottom: "4rem", fontWeight: 300 }}>
-          Mažinkite išlaidas dalindamiesi elektroninėje erdvėje su kitais!
+          Mažinkite bendruomenės išlaidas dalindamiesi elektroninėje erdvėje su
+          elitiniais nariais!
         </h2>
 
         <input
