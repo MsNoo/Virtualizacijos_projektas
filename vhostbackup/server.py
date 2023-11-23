@@ -11,7 +11,7 @@ from datetime import datetime
 import docker
 import json
 import os
-import tarfile
+import yaml
 
 app = Flask(__name__)
 
@@ -89,6 +89,7 @@ def backupContainers(backupID, timestamp):
 # Restores a specified container from backup
 def restoreContainer(backupid, timestamp, name):
     volumepath = "/opt/backup/"
+    compose_file = "/tmp/docker-compose.yml"
 
     try:
         client = docker.from_env()
@@ -104,13 +105,29 @@ def restoreContainer(backupid, timestamp, name):
             container.remove()
         tag = str(timestamp).replace(" ", "").replace("-", "").replace(":", "")
         imageName = "dockerbackup_"+name+":"+tag
+
+        # Load the Docker Compose file
+        with open(compose_file, 'r') as file:
+            compose_dict = yaml.safe_load(file)
+
+        # Get the configuration for the specific service
+        service_config = compose_dict['services'][name]
+
+        # Run the container with the configuration from the Docker Compose file
         container = client.containers.run(imageName, detach=True, name=name)
+
+        if 'networks' in service_config:
+            networks = service_config.pop('networks')
+            for network_name in networks:
+                network = client.networks.get("virtualizacijos_projektas_"+network_name)
+                network.connect(container)
+
         return True
     except:
         return False
 
 # Performs all restoration process steps (performs restore and logs actions)
-def restoreBackup():
+def restoreBackup(restoreBackupID, restoreBackupTimestamp, restoreContainerList):
     # Set starting variables
     startTimestamp = getDate()
     restoreID = str(getNewID())
@@ -120,16 +137,19 @@ def restoreBackup():
     statusNoErrors = True
 
     # Runs all backup codes
-    # Calls ontainer backup code and logs status of it
-    restoreBackupID = "20231117131133486028"
-    restoreBackupTimestamp = "2023-11-17 13:11:33"
-    restoreContainerList = ["vhost1"]
-
+    # Calls container restore code and logs status of it
     for name in restoreContainerList:
-        containerRestoreDone = restoreContainer(restoreBackupID, restoreBackupTimestamp, name)
-        if (containerRestoreDone == False):
-            statusReasonAdditional += "FAILED: Container " + name + " restore;"
+        if (name == "vhostbackup"):
+            statusReasonAdditional += "FAILED: You are not allowed to restore backup;"
             statusNoErrors = False
+        elif (name == "caddy"):
+            statusReasonAdditional += "FAILED: You are not allowed to restore caddy;"
+            statusNoErrors = False
+        else:
+            containerRestoreDone = restoreContainer(restoreBackupID, restoreBackupTimestamp, name)
+            if (containerRestoreDone == False):
+                statusReasonAdditional += "FAILED: Container " + name + " restore;"
+                statusNoErrors = False
 
     # check if backups completed and set status
     if(statusNoErrors):
@@ -214,27 +234,25 @@ def mainViewFunction():
 @app.route('/backup', methods = ['GET'])
 def backupNow():
     if(request.method == 'GET'):
+        # Calls create backup code
         createBackupResponse = createBackup()
-
-        # Other code option for nice display
-        #response = json.loads(createBackupResponse)
-        #responseStr = response["ID"] + " " + response["Status"] + " " + response["Started"] + " - " + response["Completed"]
-
         return createBackupResponse
 
 # This code is executed once http://vhostbackup.localhost/restore is called
 @app.route('/restore', methods = ['GET'])
 def restoreNow():
     if(request.method == 'GET'):
-        retoreBackupResponse = restoreBackup()
 
-        # Other code option for nice display
-        #response = json.loads(createBackupResponse)
-        #responseStr = response["ID"] + " " + response["Status"] + " " + response["Started"] + " - " + response["Completed"]
+        # For future:
+        # Code is needed to accept request with parameters...
+        # Currently save them by hand.
+        restoreBackupID = "20231123211445211536"
+        restoreBackupTimestamp = "2023-11-23 21:14:45"
+        restoreContainerList = ["vhost1", "vhost2"]
 
+        retoreBackupResponse = restoreBackup(restoreBackupID, restoreBackupTimestamp, restoreContainerList)
         return retoreBackupResponse
+    
 
-
-# Still I have to figure out what this does :)
 if __name__ == '__main__':
 	app.run(debug=False, host='0.0.0.0', port=80)
