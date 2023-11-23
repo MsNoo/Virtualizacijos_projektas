@@ -1,29 +1,35 @@
-import { useState } from "react";
+import { type FC, type ChangeEvent, useState } from "react";
 
-// TODO: fronta +-susibuildint ir tada persimest ivetoj react tsg express nes ten ir node pasieks
+import type { TDocument } from "./types";
+
+// TODO: fronta +-susibuildint, palikt react front-end kaip atskira ir prisidet dar backend expresiuka su s3 upload endpointu
 // export/docker env var AWS auth -> leis naudot aws-sdk -> expresse s3 upload endpointai -> fronta subuildint ir delete react dir kad tiesiog axiosas butu ir rodytu updated + delete mygtuka
-type TDocument = File;
 
-export const App = () => {
-  const [documents, setDocuments] = useState<TDocument[]>([]);
+export const App: FC = () => {
+  const [selectedDocuments, setSelectedDocuments] = useState<TDocument[]>([]);
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const newSelectedFiles = Array.from(event.target.files || []);
+
+    setSelectedDocuments((prevSelectedDocuments) => [
+      ...prevSelectedDocuments,
+      ...newSelectedFiles,
+    ]);
+  };
 
   return (
-    <div className="App">
-      <main>
-        <h1
-          style={{
-            padding: "2rem 1rem",
-            boxShadow: "0px 12px 22px 1px rgba(0, 0,100, .25)",
-            textTransform: "capitalize",
-            marginBottom: "4rem",
-            background:
-              "linear-gradient(90deg, rgba(202,105,222,1) 0%, rgba(119,222,221,1) 35%, rgba(122,212,155,1) 100%)",
-          }}
-        >
+    <div
+      className="App"
+      aria-label="virtualisation project main view container"
+    >
+      <header>
+        <h1 id="header-title" aria-label="file sharing site title">
           Slaptoji Failų Talpykla
         </h1>
+      </header>
 
-        <h2 style={{ marginBottom: "4rem", fontWeight: 300 }}>
+      <main>
+        <h2 id="subtitle">
           Mažinkite bendruomenės išlaidas dalindamiesi elektroninėje erdvėje su
           elitiniais nariais!
         </h2>
@@ -40,16 +46,13 @@ export const App = () => {
             boxShadow: "0px 12px 22px 1px rgba(0, 0,100, .07)",
             borderRadius: "6px",
           }}
+          onChange={handleInputChange}
           type="file"
           multiple
-          onChange={(event) => {
-            const files = Array.from(event.target.files || []);
-            setDocuments((prevDocuments) => [...prevDocuments, ...files]);
-          }}
         />
 
-        <section style={{ marginTop: "6rem" }}>
-          {documents.map((document, index) => (
+        <section id="documents-list">
+          {selectedDocuments.map((document, index) => (
             <div
               style={{
                 backgroundColor: "rgba(0, 0, 0, .03)",
@@ -66,36 +69,22 @@ export const App = () => {
               }}
               key={index}
             >
-              <p style={{ fontSize: "20px", marginRight: "0.3REM" }}>
-                {document.name}&nbsp;
-              </p>
-              <p
-                style={{
-                  color: "rgb(0,0,0,0.35)",
-                  fontSize: "20px",
-                }}
-              >
-                <i> {(document.size / 1024 / 1024).toFixed(1)} MB</i>
+              <p className="document-name">{document.name}&nbsp;</p>
+
+              <p className="document-size">
+                <i>{(document.size / 1024 / 1024).toFixed(1)}&nbsp;MB</i>
               </p>
             </div>
           ))}
         </section>
+
+        {/* TODO: list all fetched selectedDocuments */}
       </main>
 
-      <footer style={{ marginTop: "12rem" }}>
-        <p
-          style={{
-            textAlign: "center",
-            borderTop: "1px solid rgb(0,0,0,1)",
-            paddingTop: "2rem",
-            width: "max-content",
-            margin: "0 auto",
-            fontSize: "1.2rem",
-            color: "rgb(0,0,0,0.885)",
-          }}
-        >
-          © {new Date().getFullYear()} Jonas Girdzijauskas, Akvilė Mickevičūtė,
-          Tadas Kastanauskas, Renata Marcinauskaitė
+      <footer>
+        <p id="footer-credits" aria-label="file sharing site credits">
+          © {new Date().getFullYear()}&nbsp; Jonas Girdzijauskas, Akvilė
+          Mickevičūtė, Tadas Kastanauskas, Renata Marcinauskaitė
         </p>
       </footer>
     </div>

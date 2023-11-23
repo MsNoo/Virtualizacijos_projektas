@@ -7,9 +7,8 @@ COPY . .
 
 RUN sh -c 'npm i --omit=dev'
 
-RUN sh -c 'npm run build'
-
-# TODO: rm *json, node_modules
+# imanoma buildint pries keliant i containeri, taciau nebutu 1:1 consitency
+RUN sh -c 'npm run build' 
 
 FROM nginx:1.22.1-alpine as prod-stage
 
