@@ -1,3 +1,5 @@
+FROM debian:bookworm 
+
 FROM node:20
 
 WORKDIR /app
