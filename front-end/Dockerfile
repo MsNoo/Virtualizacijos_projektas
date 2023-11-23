@@ -1,11 +1,19 @@
-FROM ubuntu:latest
+FROM ubuntu:latest 
+# TODO: not latest, 18.04?
 FROM node:20 as build-stage
 
 WORKDIR /app
 
-COPY . .
+COPY ./src ./src
+COPY ./public ./public
+COPY ./package*.json .
+COPY ./tsconfig.json .
+# TODO: copy everything except node_modules
 
-RUN sh -c 'npm i --omit=dev'
+
+
+RUN npm ci
+# --omit=dev'
 
 # imanoma buildint pries keliant i containeri, taciau nebutu 1:1 consitency
 RUN sh -c 'npm run build' 

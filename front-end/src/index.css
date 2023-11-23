@@ -58,7 +58,7 @@ code {
 }
 
 footer {
-  margin-top: 8rem;
+  margin: 6rem 0;
 }
 
 #header-title {
@@ -85,10 +85,52 @@ footer {
 
 .document-name {
   font-size: 20px;
+  font-weight: bold;
   margin-right: 0.3rem;
 }
 
 #subtitle {
   margin-bottom: 4rem;
   font-weight: 300;
+}
+
+#all-documents-container {
+  margin: 4rem;
+  display: flex;
+  width: 80%;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  align-content: center;
+  text-align: auto;
+  flex-direction: column;
+  gap: 3rem;
+  margin: 4rem auto;
+}
+
+#all-documents-container p {
+  padding: 1rem 0.25rem;
+  margin-bottom: 0.4rem;
+  font-size: 2rem;
+}
+
+#all-documents-container p:hover,
+#all-documents-container p :hover {
+  cursor: pointer;
+}
+
+#document-container {
+  margin-bottom: 0.4rem;
+  width: 80vw;
+  background-color: rgba(26, 104, 88, 0.35);
+  border-bottom: 1px solid rgb(0, 0, 0, 0.25);
+}
+
+#all-documents-container .fetched-document-size {
+  font-size: 1.1rem;
+  font-weight: 300;
+}
+
+.bold {
+  font-weight: 600;
 }

@@ -1,11 +1,13 @@
-import { type FC, type ChangeEvent, useState } from "react";
+import { type FC, type ChangeEvent, useState, useEffect } from "react";
+import axios from "axios";
 
 import type { TDocument } from "./types";
 
-// TODO: fronta +-susibuildint, palikt react front-end kaip atskira ir prisidet dar backend expresiuka su s3 upload endpointu
+// TODO: fronta +-susibuildint, palikt nginx+react front-end kaip atskira ir prisidet dar backend expresiuka su s3 upload endpointu
 // export/docker env var AWS auth -> leis naudot aws-sdk -> expresse s3 upload endpointai -> fronta subuildint ir delete react dir kad tiesiog axiosas butu ir rodytu updated + delete mygtuka
-
+// TODO: nginx 404 refresh fix
 export const App: FC = () => {
+  const [documents, setDocuments] = useState<any[]>([]);
   const [selectedDocuments, setSelectedDocuments] = useState<TDocument[]>([]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -16,6 +18,22 @@ export const App: FC = () => {
       ...newSelectedFiles,
     ]);
   };
+
+  useEffect(() => {
+    // TODO: nginx reverse to use http://api https://stackoverflow.com/a/77060234
+
+    // js runs in the browser, so it can't access the docker socket https://stackoverflow.com/a/56375180
+    axios
+      .get("http://localhost:3000/api/v1/documents")
+      .then((res) => {
+        if (Array.isArray(res.data.documents)) {
+          setDocuments(res.data.documents);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
 
   return (
     <div
@@ -78,7 +96,15 @@ export const App: FC = () => {
           ))}
         </section>
 
-        {/* TODO: list all fetched selectedDocuments */}
+        {/* TODO: MUI Grid  */}
+        <div id="all-documents-container">
+          {documents.map((document) => (
+            <div id="document-container" key={document.name + document.url}>
+              <p className="bold">{document.name}</p>
+              <p className="fetched-document-size">{document.size}B</p>
+            </div>
+          ))}
+        </div>
       </main>
 
       <footer>
