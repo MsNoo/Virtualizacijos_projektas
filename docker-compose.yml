@@ -12,14 +12,22 @@ services:
       - net2
 
   vhost1:
-    image: httpd
+    build:
+      context: ./front-end/
+      dockerfile: Dockerfile
     container_name: vhost1
+    # volumes:
+    #   - ./front-end:/usr/share/nginx/html
     networks:
       - net1
-  
+
   vhost2:
-    image: httpd
+    build:
+      context: ./front-end/
+      dockerfile: Dockerfile
     container_name: vhost2
+    # volumes:
+    #   - ./front-end:/usr/share/nginx/html
     networks:
       - net2
 
@@ -42,4 +50,3 @@ networks:
 
 volumes:
   DockerBackup:
-
