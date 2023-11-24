@@ -60,7 +60,7 @@ networks:
   # accessible by vhost1 & vhost2, but not by outside or by caddy
   api-network:
     internal: true
-    # TODO: make sure it's not  accessible from local postman
+    # TODO: JONAS make sure it's not  accessible from local postman
     # driver: overlay
 
 volumes:
