@@ -13,21 +13,21 @@ services:
 
   vhost1:
     build:
-      context: ./front-end
+      context: ./front-end/admin
       dockerfile: Dockerfile
     container_name: vhost1
     networks:
       - net1
-      - api-network
+      - document-microservice-network
 
   vhost2:
     build:
-      context: ./front-end
+      context: ./front-end/user
       dockerfile: Dockerfile
     container_name: vhost2
     networks:
       - net2
-      - api-network
+      - document-microservice-network
 
   vhostbackup:
     build:
@@ -42,24 +42,24 @@ services:
       - net1
       - net2
 
-  api:
+  document-microservice:
     build:
-      context: ./api
+      context: ./document-microservice
       dockerfile: Dockerfile
-    container_name: api
+    container_name: document-microservice
     ports:
       - "3000:3000"
 
     networks:
-      - api-network
+      - document-microservice-network
 
 networks:
   net1:
   net2:
 
   # accessible by vhost1 & vhost2, but not by outside or by caddy
-  api-network:
-    internal: true
+  document-microservice-network:
+    # internal: true
     # TODO: JONAS make sure it's not  accessible from local postman
     # driver: overlay
 
