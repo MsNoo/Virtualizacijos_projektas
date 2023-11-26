@@ -3,6 +3,10 @@
 # To view backups access: http://vhostbackup.localhost/
 # To create a backup access: http://vhostbackup.localhost/backup
 # To restore a backup access: http://vhostbackup.localhost/restore
+# Example: http://vhostbackup.localhost/restore?ID=20231126143610896993&timestamp=2023-11-26%2014:36:10&list=vhost1,vhost2,api
+# To view current backup config: http://vhostbackup.localhost/getConfig
+# To change (override) current backup config: http://vhostbackup.localhost/setConfig
+# Example: http://vhostbackup.localhost/setConfig?ContainerList=vhost1,vhost2,api&ContainerExceptionList=caddy,vhostbackup
 
 # Import all dependencies
 from crypt import methods
@@ -34,18 +38,13 @@ def getBackupsRestoreLogs():
 
     # Try reading the file - if file can't be opened it means that it's corrupt and according message is showed
     try:
-        logFile = open("/opt/backup/backupRestoreLog.txt")
+        logFile = open("/opt/backup/backupRestoreLog.txt", "r")
         fileOpened = True
     except:
-        responseText = "Oops, no backup/restore logs to show! Don’t worry, you can create a backup and see the log details here afterwards."
+        responseText = statusCodeToJSON("404","Log file was not found! Please create first backup.")
 
     if(fileOpened):
-        responseText = "Backup/restore logs (showing type, status, status reason, ID number and start and end timestamp of each backup):"
-        for line in logFile:
-            # Performs transformation from JSON to more user friendly format
-            lineElements = json.loads(line)
-            responseText += '<br>'
-            responseText += lineElements["Type"] + " | " + lineElements["Status"] + " (" + lineElements["StatusReason"] + ") " + lineElements["ID"] + " (" + lineElements["Started"] + " - " + lineElements["Completed"] + ")"
+        responseText = logFile.read()
         logFile.close()
 
     return responseText
@@ -60,17 +59,110 @@ def createBackupRestoreLog(backupRestoreLogData):
     except:
         return False
 
+# Creates JSON response code for inputed status code and reason
+def statusCodeToJSON(statusCode, StatusReason):
+    statusResponseBuild = {
+        "Status": str(statusCode),
+        "StatusReason": str(StatusReason)
+    }
+    return json.dumps(statusResponseBuild)
+
+# Gets current configuration infromation and returns it
+def getConfigAll():
+    fileOpened = False
+    responseText = ""
+
+    # Try reading the file - if file can't be opened it means that it's corrupt and according message is showed
+    try:
+        configFile = open("/opt/backup/configFile.txt", "r")
+        fileOpened = True
+    except:
+        responseText = statusCodeToJSON("404","Configuration file was not found! Please create one first.")
+
+    if(fileOpened):
+        responseText = configFile.read()
+        configFile.close()
+
+    return responseText
+
+# Gets current configuration infromation for one item and returns it
+def getConfig(value):
+    fileOpened = False
+    responseText = ""
+
+    # Try reading the file - if file can't be opened it means that it's corrupt and according message is showed
+    try:
+        configFile = open("/opt/backup/configFile.txt", "r")
+        fileOpened = True
+    except:
+        responseText = False
+
+    if(fileOpened):
+        configItems = json.loads(configFile.read())
+        configFile.close()
+
+        if(value == "ContainerList"):
+            responseText = configItems["ContainerList"]
+        elif(value == "ContainerExceptionList"):
+            responseText = configItems["ContainerExceptionList"]
+        else:
+            responseText = False
+
+    if(responseText != False):
+        responseText = responseText.split(",")
+
+    return responseText
+
+# Creates backup/restore log from provided infromation and return completion status      
+def setConfig(containerList, containerExceptionList):
+    # Set starting variables
+    startTimestamp = getDate()
+    configChangeID = str(getNewID())
+    outcome = "FAILED"
+    
+    configDataBuild = {
+        "ContainerList": str(containerList),
+        "ContainerExceptionList": str(containerExceptionList)
+    }
+    configData = json.dumps(configDataBuild)
+
+    try:
+        configFile = open('/opt/backup/configFile.txt' , 'w')
+        configFile.write(str(configData))
+        configFile.close()
+        outcome = "COMPLETED"
+    except:
+        outcome = "FAILED"
+
+    # building response and log information
+    configChangeLogBuild = {
+        "ID": str(configChangeID),
+        "Type": "BACKUP CONFIG CHANGE",
+        "Status": str(outcome),
+        "StatusReason": "Changed to: " + str(configData),
+        "Started": str(startTimestamp),
+        "Completed": str(getDate())
+    }
+    configChangeLog = json.dumps(configChangeLogBuild)
+    
+    # Logs backup
+    createBackupRestoreLog(configChangeLog)
+
+    if(outcome == "COMPLETED"):
+        return True
+    else:
+        return False
+
 # Creates backup of defined containers
 def backupContainers(backupID, timestamp):
-    containerList = ["caddy", "vhost1", "vhost2", "vhostbackup"]
-    totalSteps = len(containerList)
+    containerList = getConfig("ContainerList")
     completedSteps = 0
     volumepath = "/opt/backup/"
 
     try:
         client = docker.from_env()
     except:
-        return False
+        return 0
 
     for name in containerList:
         try:
@@ -82,9 +174,9 @@ def backupContainers(backupID, timestamp):
                     f.write(chunk)
             completedSteps += 1
         except:
-            return False
+            return 0
 
-    return completedSteps == totalSteps
+    return completedSteps
 
 # Restores a specified container from backup
 def restoreContainer(backupid, timestamp, name):
@@ -96,6 +188,7 @@ def restoreContainer(backupid, timestamp, name):
     except:
         return False
 
+    
     try:
         with open(os.path.join(volumepath, f"{backupid}_{name.upper()}.tar"), 'rb') as f:
             client.images.load(f.read())
@@ -106,7 +199,7 @@ def restoreContainer(backupid, timestamp, name):
         tag = str(timestamp).replace(" ", "").replace("-", "").replace(":", "")
         imageName = "dockerbackup_"+name+":"+tag
 
-        # Load the Docker Compose file
+            # Load the Docker Compose file
         with open(compose_file, 'r') as file:
             compose_dict = yaml.safe_load(file)
 
@@ -116,12 +209,24 @@ def restoreContainer(backupid, timestamp, name):
         # Run the container with the configuration from the Docker Compose file
         container = client.containers.run(imageName, detach=True, name=name)
 
+        if 'ports' in service_config:
+            ports = service_config.pop('ports')
+            port_bindings = {}
+            for port in ports:
+                host_port, container_port = port.split(':')
+                container_port = int(container_port)
+                host_port = int(host_port)
+                port_bindings[container_port] = host_port
+            if port_bindings:
+                container.stop()
+                container.remove()
+                container = client.containers.run(imageName, detach=True, name=name, ports=port_bindings)
+
         if 'networks' in service_config:
             networks = service_config.pop('networks')
             for network_name in networks:
                 network = client.networks.get("virtualizacijos_projektas_"+network_name)
                 network.connect(container)
-
         return True
     except:
         return False
@@ -135,29 +240,33 @@ def restoreBackup(restoreBackupID, restoreBackupTimestamp, restoreContainerList)
     statusReason = ""
     statusReasonAdditional = ""
     statusNoErrors = True
+    totalLenght = len(restoreContainerList)
+    completedLenght = 0
 
     # Runs all backup codes
     # Calls container restore code and logs status of it
     for name in restoreContainerList:
-        if (name == "vhostbackup"):
-            statusReasonAdditional += "FAILED: You are not allowed to restore backup;"
+        if (name in getConfig("ContainerExceptionList")):
+            statusReasonAdditional += "FAILED: You are not allowed to restore " + str(name)
             statusNoErrors = False
-        elif (name == "caddy"):
-            statusReasonAdditional += "FAILED: You are not allowed to restore caddy;"
-            statusNoErrors = False
+            totalLenght -= 1
         else:
             containerRestoreDone = restoreContainer(restoreBackupID, restoreBackupTimestamp, name)
             if (containerRestoreDone == False):
-                statusReasonAdditional += "FAILED: Container " + name + " restore;"
+                statusReasonAdditional += "FAILED: Container " + str(name) + " restore;"
                 statusNoErrors = False
+            else:
+                completedLenght += 1
+
+    # sets current progress
+    statusReason = "DONE: " + str(completedLenght) + "/" + str(totalLenght)
 
     # check if backups completed and set status
     if(statusNoErrors):
         status = "COMPLETED"
-        statusReason = "DONE: 1/1"
     else:
         status = "FAILED"
-        statusReason = "DONE: 0/1; " + statusReasonAdditional
+        statusReason += statusReasonAdditional
 
 
     # building response and log information
@@ -188,20 +297,29 @@ def createBackup():
     backupID = str(getNewID())
     status = "STARTED"
     statusReason = ""
+    containerList = getConfig("ContainerList")
+    totalLenght = 0
+    completedLenght = 0
     
-    # Runs all backup codes
-    # Calls ontainer backup code and logs status of it
-    containerBackupDone = backupContainers(backupID, startTimestamp)
+    if(containerList != False):
+        totalLenght = len(containerList)
 
+        # Runs all backup codes
+        # Calls ontainer backup code and logs status of it
+        containerBackupDone = backupContainers(backupID, startTimestamp)
+        completedLenght = containerBackupDone
 
-    # check if backups completed and set status
-    if(containerBackupDone):
-        status = "COMPLETED"
-        statusReason = "DONE: 1/1"
+        # sets current progress
+        statusReason = "DONE: " + str(completedLenght) + "/" + str(totalLenght)
+        # check if backups completed and set status
+        if(completedLenght == totalLenght):
+            status = "COMPLETED"
+        else:
+            status = "FAILED"
+            statusReason += "; FAILED: Container backup"
     else:
         status = "FAILED"
-        statusReason = "DONE: 0/1; FAILED: Container backup"
-
+        statusReason = "No configuration for container backup"
 
     # building response and log information
     backupResponseBuild = {
@@ -226,7 +344,7 @@ def createBackup():
 
 # This code is executed once http://vhostbackup.localhost/ is called
 @app.route('/', methods = ['GET'])
-def mainViewFunction():
+def backupViewLog():
     if(request.method == 'GET'):
         return getBackupsRestoreLogs()
 
@@ -234,7 +352,6 @@ def mainViewFunction():
 @app.route('/backup', methods = ['GET'])
 def backupNow():
     if(request.method == 'GET'):
-        # Calls create backup code
         createBackupResponse = createBackup()
         return createBackupResponse
 
@@ -242,17 +359,42 @@ def backupNow():
 @app.route('/restore', methods = ['GET'])
 def restoreNow():
     if(request.method == 'GET'):
+        # Accessing parameters passed in the URL
+        restoreBackupID = request.args.get('ID')
+        restoreBackupTimestamp = request.args.get('timestamp')
+        restoreContainerList = str(request.args.get('list')).split(",")
 
-        # For future:
-        # Code is needed to accept request with parameters...
-        # Currently save them by hand.
-        restoreBackupID = "20231123211445211536"
-        restoreBackupTimestamp = "2023-11-23 21:14:45"
-        restoreContainerList = ["vhost1", "vhost2"]
-
+        if(restoreBackupID == None or restoreBackupTimestamp == None or restoreContainerList == None):
+            return statusCodeToJSON("400","Missing required parameters")
+        
         retoreBackupResponse = restoreBackup(restoreBackupID, restoreBackupTimestamp, restoreContainerList)
         return retoreBackupResponse
-    
+
+# This code is executed once http://vhostbackup.localhost/getConfig is called
+@app.route('/getConfig', methods = ['GET'])
+def backupGetConfig():
+    if(request.method == 'GET'):
+        getConfigResponse = getConfigAll()
+        return getConfigResponse
+
+# This code is executed once http://vhostbackup.localhost/setConfig is called
+@app.route('/setConfig', methods = ['GET'])
+def backupSetConfig():
+    if(request.method == 'GET'):
+        # Accessing parameters passed in the URL
+        containerList = request.args.get('ContainerList')
+        containerExceptionList = request.args.get('ContainerExceptionList')
+
+        if(containerList == None or containerExceptionList == None):
+            return statusCodeToJSON("400","Missing required parameters")
+
+        getConfigResponse = setConfig(containerList, containerExceptionList)
+        if(getConfigResponse):
+            return statusCodeToJSON("200","")
+        else:
+            return statusCodeToJSON("500","Failed to write new configurion")
+
+
 
 if __name__ == '__main__':
 	app.run(debug=False, host='0.0.0.0', port=80)
