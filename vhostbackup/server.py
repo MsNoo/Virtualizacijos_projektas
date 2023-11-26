@@ -6,7 +6,7 @@
 
 # Import all dependencies
 from crypt import methods
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from datetime import datetime
 import docker
 import json
@@ -48,7 +48,7 @@ def getBackupsRestoreLogs():
             responseText += lineElements["Type"] + " | " + lineElements["Status"] + " (" + lineElements["StatusReason"] + ") " + lineElements["ID"] + " (" + lineElements["Started"] + " - " + lineElements["Completed"] + ")"
         logFile.close()
 
-    return responseText
+    return jsonify(data=responseText)
 
 # Creates backup/restore log from provided infromation and return completion status      
 def createBackupRestoreLog(backupRestoreLogData):

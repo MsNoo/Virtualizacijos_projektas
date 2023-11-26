@@ -18,7 +18,7 @@ services:
     container_name: vhost1
     networks:
       - net1
-      - document-microservice-network
+      - documentms-network
 
   vhost2:
     build:
@@ -27,7 +27,7 @@ services:
     container_name: vhost2
     networks:
       - net2
-      - document-microservice-network
+      - documentms-network
 
   vhostbackup:
     build:
@@ -40,7 +40,7 @@ services:
     restart: unless-stopped
     networks:
       - net1
-      - net2
+      - net2 # TODO: ensure this is necessary
 
   document-microservice:
     build:
@@ -51,14 +51,14 @@ services:
       - "3000:3000"
 
     networks:
-      - document-microservice-network
+      - documentms-network # document-microservice-network throws ECONNREFUSED
 
 networks:
   net1:
   net2:
 
   # accessible by vhost1 & vhost2, but not by outside or by caddy
-  document-microservice-network:
+  documentms-network:
     # internal: true
     # TODO: JONAS make sure it's not  accessible from local postman
     # driver: overlay

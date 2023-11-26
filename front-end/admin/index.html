@@ -8,5 +8,31 @@
 
   <body>
     <h1>Atkūrimo taškų peržiūra</h1>
+
+    <!-- TODO: MUI Grid -->
+    <p id="temporary-data-text"></p>
   </body>
+
+  <script>
+    const textElement = document.querySelector("#temporary-data-text");
+
+    textElement.textContent = "Fetching backup data...";
+
+    fetch("http://vhostbackup.localhost/", {
+      headers: {
+        // TODO: ne hardcoded o is inputu auth paimt
+        Authorization: "Basic YWRtaW46YWRtaW5wYXNz",
+      },
+    })
+      .then(async (res) => {
+        const backupRes = await res.json();
+
+        textElement.textContent = JSON.stringify(backupRes);
+      })
+      .catch((err) => {
+        console.error(err);
+
+        textElement.textContent = "Failed fetching backups!";
+      });
+  </script>
 </html>
