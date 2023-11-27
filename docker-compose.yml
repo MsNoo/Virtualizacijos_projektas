@@ -42,6 +42,20 @@ services:
       - net1
       - net2
 
+  monitoring:
+    build:
+      context: ./monitoring
+      dockerfile: Dockerfile
+    volumes:
+      - /var/run/docker.sock.raw:/var/run/docker.sock
+    container_name: monitoring
+    restart: unless-stopped
+    networks:
+      - net1
+      - net2
+    ports:
+      - "8000:5000"
+
   api:
     build:
       context: ./api

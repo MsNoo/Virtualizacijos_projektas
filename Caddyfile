@@ -23,3 +23,10 @@ http://vhostbackup.localhost {
     }
     reverse_proxy vhostbackup:80
 }
+
+http://monitoring.localhost {
+    basicauth {
+        admin $2a$14$IgPUeH.xcwlIlo9q5E8qnu8H6c1BOg84JHSszshrHhhcfzFfAZHkW
+    }
+    reverse_proxy monitoring:8000
+}
