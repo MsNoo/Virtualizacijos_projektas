@@ -1,4 +1,4 @@
-FROM ubuntu:latest 
+FROM ubuntu:latest
 # TODO: not latest, 18.04?
 FROM node:20 as build-stage
 

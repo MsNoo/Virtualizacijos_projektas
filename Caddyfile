@@ -14,14 +14,35 @@ http://vhost2.localhost {
         user1 $2a$14$q4Gk9QHjhSeVNcU6GUo/je4cxK7hUCsTS5H00JX.PqXYkvk8OK15S
         user2 $2a$14$BONf2krAjwLQRwZoewJBQOZueh3oXK9DC6/tGlWaWdfWlBaz8kWVK
     }
-    reverse_proxy vhost2:80
+
+    reverse_proxy { 
+        to vhost2:80
+    }
 }
 
 http://vhostbackup.localhost {
-    basicauth {
+    @basic_matcher {
+        path /*
+        not method OPTIONS
+    }
+
+    basicauth @basic_matcher {
         admin $2a$14$BARKRbCzMKoKaG.dgkOTaOGY9TMrBt33v5ffELbKruBfQs.9fESbW
     }
-    reverse_proxy vhostbackup:80
+
+    @options method OPTIONS
+		respond @options 200
+
+    reverse_proxy { 
+        to vhostbackup:80
+        header_down Access-Control-Allow-Headers *
+        header_down Access-Control-Expose-Headers *
+    }
+
+    header Access-Control-Allow-Origin http://vhost1.localhost
+    header Access-Control-Allow-Headers *
+    header Access-Control-Allow-Methods *
+    header Access-Control-Allow-Credentials true
 }
 
 http://monitoring.localhost {

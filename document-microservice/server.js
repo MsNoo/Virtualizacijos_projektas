@@ -27,5 +27,5 @@ app.get("/api/v1/documents", (_, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}.`);
+  console.log(`document-microservice listening on ${PORT}.`);
 });
