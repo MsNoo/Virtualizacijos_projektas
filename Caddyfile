@@ -44,3 +44,10 @@ http://vhostbackup.localhost {
     header Access-Control-Allow-Methods *
     header Access-Control-Allow-Credentials true
 }
+
+http://monitoring.localhost {
+    basicauth {
+        admin $2a$14$IgPUeH.xcwlIlo9q5E8qnu8H6c1BOg84JHSszshrHhhcfzFfAZHkW
+    }
+    reverse_proxy monitoring:8000
+}

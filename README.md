@@ -19,11 +19,25 @@ docker-compose up --force-recreate --build
 - Happy path:
   - http://vhost1.localhost/
   - http://vhost2.localhost/
+  - http://monitoring.localhost/
 - Bad path:
   - http://vhost1.localhost/.htaccess
 
 #### Passwords
 
-adminpass
-user1pass
-user2pass
+vhost1:
+
+    admin:adminpass
+
+vhos2:
+
+    admin:user1pass
+
+vhostbackup:
+
+    admin:user2pass
+
+monitoring:
+
+    admin:monitoring
+
