@@ -18,6 +18,8 @@ docker-compose up --force-recreate --build
 
 docker compose -d
 
+TODO: situs i notes perkelt is cia
+
 # stop all containers
 
 docker ps -a --format="{{.ID}}" | \
@@ -27,6 +29,10 @@ docker ps -a --format="{{.ID}}" | \
 # delete all containers
 
 docker rm $(docker ps -q) -f
+
+# cache troubleshooting 2
+
+https://stackoverflow.com/a/32618288
 
 # connect to the container's CLI
 

@@ -12,19 +12,21 @@ services:
       - net2
 
   vhost1:
+    container_name: vhost1
+    command: sleep infinity
     build:
       context: ./front-end/admin
       dockerfile: Dockerfile
-    container_name: vhost1
     networks:
       - net1
       - documentms-network
 
   vhost2:
+    container_name: vhost2
+    command: sleep infinity
     build:
       context: ./front-end/user
       dockerfile: Dockerfile
-    container_name: vhost2
     networks:
       - net2
       - documentms-network
@@ -73,13 +75,13 @@ services:
     build:
       context: ./startup
       dockerfile: Dockerfile
-    volumes:
+    volumes: # TODO: ensure all these volumes are required
       - ./startup:/opt
       - /var/run/docker.sock:/var/run/docker.sock
       - //var/run/docker.sock:/var/run/docker.sock
       - /var/run/docker.sock.raw:/var/run/docker.sock
       - //var/run/docker.sock.raw:/var/run/docker.sock
-    networks:
+    networks: # TODO: ensure both of these networks are required
       - net1
       - net2
 
