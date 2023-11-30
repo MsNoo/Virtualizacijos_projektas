@@ -5,13 +5,15 @@
 Unix (with colima if Docker CLI is unavailable):
 
 ```bash
-colima start && docker-compose up
+docker-compose up
 ```
 
-No cache:
+# Troubleshooting
+
+Run `colima start` if docker daemon is causing issues on unix.
 
 ```bash
-colima start && docker-compose up --force-recreate --build
+docker-compose up --force-recreate --build
 ```
 
 docker compose -d

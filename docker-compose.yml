@@ -79,6 +79,9 @@ services:
       - //var/run/docker.sock:/var/run/docker.sock
       - /var/run/docker.sock.raw:/var/run/docker.sock
       - //var/run/docker.sock.raw:/var/run/docker.sock
+    networks:
+      - net1
+      - net2
 
 networks:
   net1:

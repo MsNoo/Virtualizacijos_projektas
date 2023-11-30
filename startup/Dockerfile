@@ -4,7 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # ansible installation fix
 ENV TZ='Europe/Vilnius' 
 
-RUN apt update && apt install python3 ansible docker-compose  -y
+RUN apt update && apt install python3 ansible docker-compose curl -y
 
 COPY playbook.yml /opt/playbook.yml
 
