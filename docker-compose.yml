@@ -61,11 +61,24 @@ services:
       context: ./document-microservice
       dockerfile: Dockerfile
     container_name: document-microservice
+    restart: unless-stopped
     ports:
       - "3000:3000"
-
     networks:
       - documentms-network # document-microservice-network throws ECONNREFUSED
+
+  startup:
+    container_name: startup
+    command: sleep infinity
+    build:
+      context: ./startup
+      dockerfile: Dockerfile
+    volumes:
+      - ./startup:/opt
+      - /var/run/docker.sock:/var/run/docker.sock
+      - //var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock.raw:/var/run/docker.sock
+      - //var/run/docker.sock.raw:/var/run/docker.sock
 
 networks:
   net1:
