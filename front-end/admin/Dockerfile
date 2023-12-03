@@ -1,6 +1,4 @@
-FROM ubuntu:latest
-# TODO: not latest, 18.04?
-FROM node:20 as build-stage
+FROM ubuntu:18.04
 
 RUN apt update
 
@@ -8,12 +6,12 @@ WORKDIR /app
 
 COPY index.html index.html
 
-FROM nginx:1.22.1-alpine as prod-stage
+RUN sh -c "apt-get install nginx -y"
 
-COPY --from=build-stage /app/index.html  /usr/share/nginx/html
-
-EXPOSE 80 
+COPY /index.html /usr/share/nginx/html
 
 RUN sh -c "nginx -t"
+
+EXPOSE 80 
 
 CMD ["nginx", "-g", "daemon off;"]

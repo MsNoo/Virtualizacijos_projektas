@@ -1,2 +1,20 @@
-- name: Main playbook for the infrastructure
-  host: localhost
+- name: Main playbook
+  hosts: localhost
+  gather_facts: true
+  tasks:
+    - name: Update apt cache
+      community.docker.docker_container_exec:
+        container: vhost1
+        command: apt-get update
+
+    - name: Install wget curl
+      community.docker.docker_container_exec:
+        container: vhost1
+        command: apt-get install wget curl -y
+      register: result
+
+    - name: Status of install
+      ansible.builtin.debug:
+        msg: "{{ result }}"
+      # task:
+      #34:46 video

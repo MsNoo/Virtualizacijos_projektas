@@ -13,7 +13,7 @@ docker-compose up
 Run `colima start` if docker daemon is causing issues on unix.
 
 ```bash
-docker-compose up --force-recreate --build
+docker-compose up --force-recreate --build -d
 ```
 
 docker compose -d
@@ -24,7 +24,9 @@ TODO: situs i notes perkelt is cia
 
 docker ps -a --format="{{.ID}}" | \
  xargs docker update --restart=no | \
- xargs docker stop
+ xargs docker stop && (docker rm $(docker ps -q) -f || echo '3') &&
+docker-compose up --force-recreate --build -d &&
+docker-compose exec startup bash
 
 # delete all containers
 

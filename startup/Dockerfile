@@ -1,6 +1,8 @@
-FROM debian:bookworm 
+FROM ubuntu
 
 COPY playbook.yml /opt/playbook.yml
+
+WORKDIR /
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -8,9 +10,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ='Europe/Vilnius' 
 
 
-RUN apt update && apt install python3 ansible docker-compose curl -y
+# TODO: cia cmd turetu but?
+RUN apt update && apt-get install python3 ansible docker-compose curl -y
 
 RUN ansible-galaxy collection install community.docker
 
-
-CMD apt-get install docker-compose -y
