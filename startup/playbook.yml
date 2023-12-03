@@ -1,3 +1,4 @@
+# TODO: move most logic from all Dockerfiles to this file
 - name: Main playbook
   hosts: localhost
   gather_facts: true
@@ -7,14 +8,48 @@
         container: vhost1
         command: apt-get update
 
-    - name: Install wget curl
+    - name: Install additional binaries
       community.docker.docker_container_exec:
         container: vhost1
-        command: apt-get install wget curl -y
+        command: apt-get install sed wget curl unzip -y
       register: result
 
+    - name: Download WordPress
+      community.docker.docker_container_exec:
+        container: vhost1
+        command: wget -O  /tmp/latest.zip https://wordpress.org/latest.zip
+      register: result
+
+    - name: Extract WordPress to /var/www/html
+      community.docker.docker_container_exec:
+        container: vhost1
+        command: unzip -o /tmp/latest.zip -d /var/www/html
+
+    - name: Rename wp-config
+      community.docker.docker_container_exec:
+        container: vhost1
+        command: mv /var/www/html/wordpress/wp-config-sample.php /var/www/html/wordpress/wp-config.php
+
+    # This would be more secure with SecretsManager
+    - name: Set database name
+      community.docker.docker_container_exec:
+        container: vhost1
+        command: sed -i "s/database_name_here/wordpress/g" /var/www/html/wordpress/wp-config.php
+      register: result
+
+    - name: Set database username
+      community.docker.docker_container_exec:
+        container: vhost1
+        command: sed -i "s/username_here/wordpress/g" /var/www/html/wordpress/wp-config.php
+    - name: Set database password
+      community.docker.docker_container_exec:
+        container: vhost1
+        command: sed -i "s/password_here/wordpress/g" /var/www/html/wordpress/wp-config.php
+    - name: Set database host
+      community.docker.docker_container_exec:
+        container: vhost1
+        command: sed -i "s/localhost/database/g" /var/www/html/wordpress/wp-config.php
     - name: Status of install
       ansible.builtin.debug:
         msg: "{{ result }}"
-      # task:
-      #34:46 video
+      # 41:30 video

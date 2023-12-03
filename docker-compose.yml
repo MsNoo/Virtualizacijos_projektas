@@ -17,6 +17,8 @@ services:
     build:
       context: ./front-end/admin
       dockerfile: Dockerfile
+    volumes:
+      - ./front-end/admin:/var/www/html
     networks:
       - net1
       - documentms-network
@@ -58,6 +60,15 @@ services:
     ports:
       - "8000:5000"
 
+  database:
+    container_name: database
+    command: sleep infinity
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    networks:
+      - net3
+
   document-microservice:
     build:
       context: ./document-microservice
@@ -71,7 +82,7 @@ services:
 
   startup:
     container_name: startup
-    command: sleep infinity
+    command: ansible-playbook /opt/playbook.yml
     build:
       context: ./startup
       dockerfile: Dockerfile
@@ -81,14 +92,23 @@ services:
       - //var/run/docker.sock:/var/run/docker.sock
       - /var/run/docker.sock.raw:/var/run/docker.sock
       - //var/run/docker.sock.raw:/var/run/docker.sock
+    depends_on:
+      - database
+      - document-microservice
+      - vhost1
+      - vhost2
+      - vhostbackup
+      - caddy
+      - monitoring
     networks: # TODO: ensure both of these networks are required
       - net1
       - net2
+      - net3
 
 networks:
   net1:
   net2:
-
+  net3:
   # accessible by vhost1 & vhost2, but not by outside or by caddy
   documentms-network:
     # internal: true

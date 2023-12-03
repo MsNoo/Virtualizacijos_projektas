@@ -24,9 +24,11 @@ TODO: situs i notes perkelt is cia
 
 docker ps -a --format="{{.ID}}" | \
  xargs docker update --restart=no | \
- xargs docker stop && (docker rm $(docker ps -q) -f || echo '3') &&
+ xargs docker stop && (docker rm $(docker ps -q) -f || echo 'Cannot stop.') &&
 docker-compose up --force-recreate --build -d &&
 docker-compose exec startup bash
+
+# zsh alias: dce - docker-compose exec
 
 # delete all containers
 
