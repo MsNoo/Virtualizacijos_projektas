@@ -73,34 +73,34 @@ services:
     container_name: document-microservice
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "5001:5001"
     networks:
       - documentms-network # document-microservice-network throws ECONNREFUSED
 
-  # startup:
-  #   container_name: startup
-  #   command: ansible-playbook /opt/playbook.yml
-  #   build:
-  #     context: ./startup
-  #     dockerfile: Dockerfile
-  #   volumes: # TODO: ensure all these volumes are required
-  #     - ./startup:/opt
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - //var/run/docker.sock:/var/run/docker.sock
-  #     - /var/run/docker.sock.raw:/var/run/docker.sock
-  #     - //var/run/docker.sock.raw:/var/run/docker.sock
-  #   depends_on:
-  #     - database
-  #     - document-microservice
-  #     - vhost1
-  #     - vhost2
-  #     - vhostbackup
-  #     - caddy
-  #     - monitoring
-  #   networks: # TODO: ensure both of these networks are required
-  #     - net1
-  #     - net2
-  #     - net3
+  startup:
+    container_name: startup
+    command: ansible-playbook /opt/playbook.yml
+    build:
+      context: ./startup
+      dockerfile: Dockerfile
+    volumes: # TODO: ensure all these volumes are required
+      - ./startup:/opt
+      - /var/run/docker.sock:/var/run/docker.sock
+      - //var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock.raw:/var/run/docker.sock
+      - //var/run/docker.sock.raw:/var/run/docker.sock
+    depends_on:
+      - database
+      - document-microservice
+      - vhost1
+      - vhost2
+      - vhostbackup
+      - caddy
+      - monitoring
+    networks: # TODO: ensure both of these networks are required
+      - net1
+      - net2
+      - net3
 
 networks:
   net1:
