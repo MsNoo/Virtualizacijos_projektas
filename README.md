@@ -74,7 +74,7 @@ vhost1:
 
 vhos2:
 
-    admin:user1pass
+    user1:user1pass
 
 vhostbackup:
 
