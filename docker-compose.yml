@@ -12,8 +12,6 @@ services:
       - net2
 
   vhost1:
-    container_name: vhost1
-    command: sleep infinity
     build:
       context: ./front-end/admin
       dockerfile: Dockerfile
@@ -24,11 +22,10 @@ services:
       - documentms-network
 
   vhost2:
-    container_name: vhost2
-    command: sleep infinity
     build:
       context: ./front-end/user
       dockerfile: Dockerfile
+    container_name: vhost2
     networks:
       - net2
       - documentms-network
@@ -58,7 +55,7 @@ services:
       - net1
       - net2
     ports:
-      - "8000:8000"
+      - "8000:5000"
 
   database:
     container_name: database
@@ -80,30 +77,30 @@ services:
     networks:
       - documentms-network # document-microservice-network throws ECONNREFUSED
 
-  startup:
-    container_name: startup
-    command: ansible-playbook /opt/playbook.yml
-    build:
-      context: ./startup
-      dockerfile: Dockerfile
-    volumes: # TODO: ensure all these volumes are required
-      - ./startup:/opt
-      - /var/run/docker.sock:/var/run/docker.sock
-      - //var/run/docker.sock:/var/run/docker.sock
-      - /var/run/docker.sock.raw:/var/run/docker.sock
-      - //var/run/docker.sock.raw:/var/run/docker.sock
-    depends_on:
-      - database
-      - document-microservice
-      - vhost1
-      - vhost2
-      - vhostbackup
-      - caddy
-      - monitoring
-    networks: # TODO: ensure both of these networks are required
-      - net1
-      - net2
-      - net3
+  # startup:
+  #   container_name: startup
+  #   command: ansible-playbook /opt/playbook.yml
+  #   build:
+  #     context: ./startup
+  #     dockerfile: Dockerfile
+  #   volumes: # TODO: ensure all these volumes are required
+  #     - ./startup:/opt
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - //var/run/docker.sock:/var/run/docker.sock
+  #     - /var/run/docker.sock.raw:/var/run/docker.sock
+  #     - //var/run/docker.sock.raw:/var/run/docker.sock
+  #   depends_on:
+  #     - database
+  #     - document-microservice
+  #     - vhost1
+  #     - vhost2
+  #     - vhostbackup
+  #     - caddy
+  #     - monitoring
+  #   networks: # TODO: ensure both of these networks are required
+  #     - net1
+  #     - net2
+  #     - net3
 
 networks:
   net1:

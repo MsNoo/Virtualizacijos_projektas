@@ -5,7 +5,7 @@ dotenv.config();
 
 import { documentController } from "./controllers/document.controller.js";
 
-const PORT = 3_009;
+const PORT = 3_000;
 const app = express();
 
 app.use(express.json());
