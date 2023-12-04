@@ -14,8 +14,6 @@ services:
   vhost1:
     container_name: vhost1
     command: sleep infinity
-    ports:
-      - "80:80"
     build:
       context: ./front-end/admin
       dockerfile: Dockerfile
