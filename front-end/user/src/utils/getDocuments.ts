@@ -7,7 +7,7 @@ export const getDocuments = async () => {
   return (
     axios
       // TODO: API URL
-      .get<{ documents: TDocument[] }>("http://localhost:3000/api/v1/documents")
+      .get<{ documents: TDocument[] }>("http://localhost:5001/api/v1/documents")
       .then((res) => {
         if (!Array.isArray(res.data.documents)) {
           throw new Error(`Documents are not an array: ${res.data.documents}.`);

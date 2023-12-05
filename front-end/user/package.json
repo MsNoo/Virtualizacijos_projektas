@@ -4,6 +4,10 @@
   "private": true,
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "7.21.11",
+    "@emotion/react": "11.11.1",
+    "@emotion/styled": "11.11.0",
+    "@mui/material": "5.14.19",
+    "@mui/x-data-grid": "6.18.3",
     "@types/axios": "0.14.0",
     "@types/node": "16.18.64",
     "@types/react": "18.2.38",

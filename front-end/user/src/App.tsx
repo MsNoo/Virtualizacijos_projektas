@@ -1,14 +1,18 @@
 import { type FC, type ChangeEvent, useState, useEffect } from "react";
+import { DataGrid, GridDeleteIcon } from "@mui/x-data-grid";
+import { Button, IconButton } from "@mui/material";
 
 import type { TDocument } from "./types";
-import { getDocuments, getCredits } from "./utils";
-import { getFormattedSize } from "./utils/getFormattedSize";
+import {
+  getDocuments,
+  uploadDocuments,
+  getCredits,
+  getFormattedSize,
+} from "./utils";
+import { documentGridColumns } from "./utils/documentGridColumns";
 
-// TODO: fronta +-susibuildint, palikt nginx+react front-end kaip atskira ir prisidet dar backend expresiuka su s3 upload endpointu
 // export/docker env var AWS auth -> leis naudot aws-sdk -> expresse s3 upload endpointai -> fronta subuildint ir delete react dir kad tiesiog axiosas butu ir rodytu updated + delete mygtuka
-// TODO: nginx 404 refresh fix
-// TODO: vu docker: data storage, virtual segregation networks
-// TODO: translations simple example
+// TODO: vu docker: data storage
 export const App: FC = () => {
   const [_documents, setDocuments] = useState<any[]>([]);
   const [_selectedDocuments, setSelectedDocuments] = useState<TDocument[]>([]);
@@ -23,10 +27,38 @@ export const App: FC = () => {
     ]);
   };
 
+  const handleRemoveSelectedDocument = (document: TDocument) => {
+    setSelectedDocuments((prevSelectedDocuments) =>
+      prevSelectedDocuments.filter(
+        (prevSelectedDocument) => prevSelectedDocument.name !== document.name
+      )
+    );
+  };
+
+  const refreshDocuments = async () => {
+    const documents = await getDocuments();
+
+    setDocuments(documents);
+  };
+
+  const handleSelectedDocumentsUpload = async () => {
+    const formData = new FormData();
+
+    _selectedDocuments.forEach((document) => {
+      formData.append("files", document);
+    });
+
+    await uploadDocuments(formData);
+
+    setSelectedDocuments([]);
+
+    await refreshDocuments();
+  };
+
   useEffect(() => {
     // TODO: nginx reverse to use http://api https://stackoverflow.com/a/77060234
-    getDocuments().then(setDocuments);
-  }, [getDocuments]);
+    refreshDocuments();
+  }, []);
 
   return (
     <div
@@ -39,7 +71,7 @@ export const App: FC = () => {
         </h1>
       </header>
 
-      <main>
+      <main id="view-container">
         <h2 id="subtitle">
           Mažinkite bendruomenės išlaidas dalindamiesi elektroninėje erdvėje su
           elitiniais nariais!
@@ -57,18 +89,37 @@ export const App: FC = () => {
             <div id="selected-upload-document-container" key={index}>
               <p className="document-name">{document.name}&nbsp;</p>
               <p className="document-size">{getFormattedSize(document.size)}</p>
+              <p className="document-delete-button">
+                <IconButton
+                  onClick={() => handleRemoveSelectedDocument(document)}
+                >
+                  <GridDeleteIcon />
+                </IconButton>
+              </p>
             </div>
           ))}
+
+          {_selectedDocuments.length ? (
+            <Button variant="outlined" onClick={handleSelectedDocumentsUpload}>
+              Upload
+            </Button>
+          ) : null}
         </section>
 
-        {/* TODO: MUI Grid  */}
         <div id="all-documents-container">
-          {_documents.map((document) => (
-            <div id="document-container" key={document.name + document.url}>
-              <p className="bold">{document.name}</p>
-              <p className="fetched-document-size">{document.size}B</p>
-            </div>
-          ))}
+          <DataGrid
+            rows={_documents}
+            columns={documentGridColumns}
+            pageSizeOptions={[5]}
+            disableRowSelectionOnClick
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 10,
+                },
+              },
+            }}
+          />
         </div>
       </main>
 
