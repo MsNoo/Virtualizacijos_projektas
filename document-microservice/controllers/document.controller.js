@@ -28,11 +28,6 @@ documentController.get("/", (_, res) => {
 documentController.post("/", (req, res) => {
   const files = req.files;
 
-  console.error(req.files);
-  console.error(req.body);
-
-  // get express request files
-
   if (!files) {
     return res.status(400).json({ message: "No files provided." }).end();
   }

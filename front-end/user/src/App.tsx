@@ -12,7 +12,6 @@ import {
 import { documentGridColumns } from "./utils/documentGridColumns";
 
 // export/docker env var AWS auth -> leis naudot aws-sdk -> expresse s3 upload endpointai -> fronta subuildint ir delete react dir kad tiesiog axiosas butu ir rodytu updated + delete mygtuka
-// TODO: vu docker: data storage
 export const App: FC = () => {
   const [_documents, setDocuments] = useState<any[]>([]);
   const [_selectedDocuments, setSelectedDocuments] = useState<TDocument[]>([]);

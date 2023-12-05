@@ -1,5 +1,4 @@
-FROM ubuntu:latest
-# TODO: not latest, 18.04?
+FROM ubuntu:18.04
 FROM node:20 as build-stage
 
 RUN apt update
@@ -10,14 +9,10 @@ COPY ./src ./src
 COPY ./public ./public
 COPY ./package*.json .
 COPY ./tsconfig.json .
-# TODO: copy everything except node_modules
-
-
 
 RUN npm ci
-# --omit=dev'
 
-# imanoma buildint pries keliant i containeri, taciau nebutu 1:1 consitency
+# imanoma buildint pries keliant i containeri, taciau nebutu 1:1 consistency
 RUN sh -c 'npm run build' 
 
 FROM nginx:1.22.1-alpine as prod-stage

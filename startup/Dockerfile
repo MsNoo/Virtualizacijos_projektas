@@ -2,8 +2,6 @@ FROM ubuntu
 
 COPY playbook.yml /opt/playbook.yml
 
-#WORKDIR /
-
 ARG DEBIAN_FRONTEND=noninteractive
 
 # ansible installation fix due to a requirement to type the location

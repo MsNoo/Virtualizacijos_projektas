@@ -3,6 +3,45 @@
   hosts: localhost
   gather_facts: true
   tasks:
+    - name: install pip
+      community.docker.docker_container_exec:
+        container: startup
+        command: apt-get install python3-pip -y
+
+    - name: install required aws-related libs
+      community.docker.docker_container_exec:
+        container: startup
+        command: pip install boto3
+
+    - name: Create /root/.aws dir
+      shell: mkdir -p /root/.aws
+
+    - name: Set AWS config
+      shell: |
+        echo "[default]
+        region = us-west-2" > /root/.aws/config
+      register: stdd
+    - debug: var=stdd
+
+    - name: Set AWS credentials
+      shell: |
+        echo "[default]
+        aws_access_key_id = AKIASLBVYQRNJKMZ5UWG
+        aws_secret_access_key = 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" > /root/.aws/credentials
+
+    - name: Create S3 bucket for document storage
+      amazon.aws.s3_bucket:
+        name: dev-document-22222
+        region: us-west-2
+        state: present
+        encryption: "AES256"
+        public_access:
+          block_public_acls: true
+          block_public_policy: true
+          ignore_public_acls: true
+      register: url_output
+    - debug: var=stdd
+
     - name: Update apt cache
       community.docker.docker_container_exec:
         container: vhost1
