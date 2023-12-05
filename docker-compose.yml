@@ -12,6 +12,7 @@ services:
       - net2
 
   vhost1:
+    container_name: vhost1
     build:
       context: ./front-end/admin
       dockerfile: Dockerfile
@@ -19,7 +20,6 @@ services:
       - ./front-end/admin:/var/www/html
     networks:
       - net1
-      - documentms-network
 
   vhost2:
     build:
