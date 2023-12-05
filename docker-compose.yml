@@ -22,33 +22,33 @@ services:
       - net1
 
   vhost2:
+    container_name: vhost2
     build:
       context: ./front-end/user
       dockerfile: Dockerfile
-    container_name: vhost2
     networks:
       - net2
       - documentms-network
 
   vhostbackup:
+    container_name: vhostbackup
     build:
       context: .
       dockerfile: Dockerfile-vhostbackup
     volumes:
       - DockerBackup:/opt/backup
       - /var/run/docker.sock.raw:/var/run/docker.sock
-    container_name: vhostbackup
     restart: unless-stopped
     networks:
       - net1
 
   monitoring:
+    container_name: monitoring
     build:
       context: ./monitoring
       dockerfile: Dockerfile
     volumes:
       - /var/run/docker.sock.raw:/var/run/docker.sock
-    container_name: monitoring
     restart: unless-stopped
     networks:
       - net1
@@ -66,10 +66,13 @@ services:
       - net3
 
   document-microservice:
+    container_name: document-microservice
+    command: sleep infinity
     build:
       context: ./document-microservice
       dockerfile: Dockerfile
-    container_name: document-microservice
+    volumes:
+      - ./document-microservice:/app
     restart: unless-stopped
     ports:
       - "5001:5001"

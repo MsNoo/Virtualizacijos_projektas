@@ -1,26 +1,26 @@
 FROM ubuntu:18.04
 FROM node:20 as build-stage
 
-RUN apt update
+# RUN apt update
 
-WORKDIR /app
+# WORKDIR /app
 
-COPY ./src ./src
-COPY ./public ./public
-COPY ./package*.json .
-COPY ./tsconfig.json .
+# COPY ./src ./src
+# COPY ./public ./public
+# COPY ./package*.json .
+# COPY ./tsconfig.json .
 
-RUN npm ci
+# RUN npm ci
 
-# imanoma buildint pries keliant i containeri, taciau nebutu 1:1 consistency
-RUN sh -c 'npm run build' 
+# # imanoma buildint pries keliant i containeri, taciau nebutu 1:1 consistency
+# RUN sh -c 'npm run build' 
 
-FROM nginx:1.22.1-alpine as prod-stage
+# FROM nginx:1.22.1-alpine as prod-stage
 
-COPY --from=build-stage /app/build /usr/share/nginx/html
+# COPY --from=build-stage /app/build /usr/share/nginx/html
 
-EXPOSE 80 
+# EXPOSE 80 
 
-RUN sh -c "nginx -t"
+# RUN sh -c "nginx -t"
 
-CMD ["nginx", "-g", "daemon off;"]
+# CMD ["nginx", "-g", "daemon off;"]
