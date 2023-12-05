@@ -1,6 +1,7 @@
 import { type FC, type ChangeEvent, useState, useEffect } from "react";
 import { DataGrid, GridDeleteIcon } from "@mui/x-data-grid";
-import { Button, IconButton } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
+import { IconButton } from "@mui/material";
 
 import type { TDocument } from "./types";
 import {
@@ -14,6 +15,7 @@ import { documentGridColumns } from "./utils/documentGridColumns";
 // export/docker env var AWS auth -> leis naudot aws-sdk -> expresse s3 upload endpointai -> fronta subuildint ir delete react dir kad tiesiog axiosas butu ir rodytu updated + delete mygtuka
 export const App: FC = () => {
   const [_documents, setDocuments] = useState<any[]>([]);
+  const [_isLoading, setIsLoading] = useState<boolean>(false);
   const [_selectedDocuments, setSelectedDocuments] = useState<TDocument[]>([]);
   const _credits = getCredits();
 
@@ -47,7 +49,11 @@ export const App: FC = () => {
       formData.append("files", document);
     });
 
+    setIsLoading(true);
+
     await uploadDocuments(formData);
+
+    setIsLoading(false);
 
     setSelectedDocuments([]);
 
@@ -99,9 +105,13 @@ export const App: FC = () => {
           ))}
 
           {_selectedDocuments.length ? (
-            <Button variant="outlined" onClick={handleSelectedDocumentsUpload}>
+            <LoadingButton
+              onClick={handleSelectedDocumentsUpload}
+              loading={_isLoading}
+              variant="outlined"
+            >
               Upload
-            </Button>
+            </LoadingButton>
           ) : null}
         </section>
 

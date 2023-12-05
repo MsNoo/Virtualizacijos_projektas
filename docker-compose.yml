@@ -41,7 +41,6 @@ services:
     restart: unless-stopped
     networks:
       - net1
-      - net2 # TODO: ensure this is necessary
 
   monitoring:
     build:

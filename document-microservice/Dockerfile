@@ -1,13 +1,11 @@
 FROM debian:bookworm 
-
 FROM node:20
 
 WORKDIR /app
-
+ 
 COPY package*.json ./
 
-RUN npm i
-#ci --omit=dev
+RUN npm ci --omit=dev
 
 COPY . .
 

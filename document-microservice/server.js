@@ -1,7 +1,7 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
 import fileParser from "express-multipart-file-parser";
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
 dotenv.config();
 
 import { documentController } from "./controllers/document.controller.js";

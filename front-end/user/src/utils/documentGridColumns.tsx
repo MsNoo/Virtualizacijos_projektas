@@ -17,7 +17,7 @@ export const documentGridColumns: GridColDef[] = [
     width: 200,
     renderCell: (params) => {
       return (
-        <a href={params.row.url} target="_blank">
+        <a href={params.row.url} target="_blank" rel="noreferrer">
           Download
         </a>
       );
