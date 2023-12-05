@@ -32,6 +32,8 @@ documentController.post("/", (req, res) => {
     return res.status(400).json({ message: "No files provided." }).end();
   }
 
+  // upload file to s3
+
   const newFiles = files.map((file, i) => {
     return {
       id: tempDb.documents.length + i,
