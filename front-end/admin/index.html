@@ -4,13 +4,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Atkūrimo taškų peržiūra</title>
-  </head>
+    <style>
+      h1 {
+        width: 100%;
+        text-align: center;
+      }
 
+      div {
+        text-align: center;
+      }  
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th, td {
+        text-align: left;
+        padding: 8px;
+      }
+
+      tr:nth-child(even){background-color: #f2f2f2}
+
+      th {
+        background-color: gainsboro;
+      }
+      tr:hover {background-color: rgb(220, 220, 220);}
+    </style>
+  </head>
+  
   <body>
-    <h1>Atkūrimo taškų peržiūra</h1>
+    <h1>Atsarginių kopijų veiksmų istorijos peržiūra</h1>
 
     <!-- TODO: MUI Grid -->
-    <p id="temporary-data-text"></p>
+    <div id="temporary-data-text"></div>
   </body>
 
   <script>
@@ -28,7 +55,7 @@
       .then(async (res) => {
         const backupRes = await res.json();
 
-        textElement.textContent = JSON.stringify(backupRes);
+        textElement.innerHTML = backupRes.data;
       })
       .catch((err) => {
         console.error(err);

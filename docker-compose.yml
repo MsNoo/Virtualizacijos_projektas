@@ -15,6 +15,7 @@ services:
     build:
       context: ./front-end/admin
       dockerfile: Dockerfile
+    container_name: vhost1
     volumes:
       - ./front-end/admin:/var/www/html
     networks:
@@ -41,7 +42,6 @@ services:
     restart: unless-stopped
     networks:
       - net1
-      - net2 # TODO: ensure this is necessary
 
   monitoring:
     build:
