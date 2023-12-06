@@ -32,7 +32,6 @@ services:
 
   vhostbackup:
     container_name: vhostbackup
-    command: sleep infinity
     build:
       context: ./vhostbackup
       dockerfile: Dockerfile
@@ -116,12 +115,6 @@ networks:
   net2:
   net3:
   documentms-network:
-
-  # accessible by vhost1 & vhost2, but not by outside or by caddy
-  # internal: true
-  # TODO: JONAS make sure it's not  accessible from local postman
-  # driver: overlay
-  # TODO: pagal diagrama is dc acces test
 
 volumes:
   DockerBackup:

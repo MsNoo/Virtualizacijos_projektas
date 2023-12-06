@@ -1,10 +1,10 @@
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 
-import { getDocuments, saveDocument } from "./db.service.js";
+import { getDocuments, saveDocumentInRepository } from "./db.service.js";
 import { getS3Client, uploadFile } from "./s3.service.js";
 
-export const saveDocuments = async (files) => {
+export const saveDocuments = async (files, uploaderIp) => {
   const s3Client = getS3Client("us-west-2");
 
   for (const file of files) {
@@ -15,7 +15,7 @@ export const saveDocuments = async (files) => {
       s3Client
     );
 
-    await saveDocument();
+    await saveDocumentInRepository(file, uploaderIp);
   }
 
   console.info(`Added ${Object.keys(files).length} documents.`);

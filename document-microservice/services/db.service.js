@@ -25,18 +25,34 @@ export const getDocuments = async () => {
     };
   } catch (err) {
     console.error(err);
+    return { documents: [] };
   } finally {
     await client.end();
   }
 };
 
-export const saveDocument = async (files) => {
+export const saveDocumentInRepository = async (file, uploaderIp) => {
   const client = getDbClient();
+  // adjust for all browsers and devices
+  const adaptedFileSize =
+    file?.size ||
+    file?.arrayBuffer?.length ||
+    file?.arrayBuffer?.byteLength ||
+    file?.buffer?.length ||
+    file?.buffer?.byteLength ||
+    file?.length ||
+    file?.byteLength ||
+    0;
 
-  await client.connect();
+  file;
   try {
+    await client.connect();
+
+    // if we have time we can display why systems like this require sql escaping
+    const insertQueryValues = `('${uploaderIp}', '${file.originalname}',${adaptedFileSize})`;
+
     const res = await client.query(
-      "INSERT INTO documents (uploader_ip, name, size) VALUES ('12.42.13.15', 'aws_guide.pdf',44242);"
+      `INSERT INTO documents (uploader_ip, name, size) VALUES ${insertQueryValues};`
     );
 
     return res;

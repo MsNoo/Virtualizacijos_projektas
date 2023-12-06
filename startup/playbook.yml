@@ -1,4 +1,3 @@
-# TODO: move most logic from all Dockerfiles to this file
 - name: Main playbook
   hosts: localhost
   gather_facts: true
@@ -8,8 +7,8 @@
     s3BucketName: "dev0-document-storage"
 
     # AWS credentials are sensitive and should not be committed - preferably fetched from SecretsManager or passed to ansible
-    awsAccessKeyId:
-    awsSecretAccessKey:
+    awsAccessKeyId: AKIASLBVYQRNJ6TGXO6H
+    awsSecretAccessKey: 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
 
   tasks:
     - name: Install pip [startup]
@@ -82,22 +81,18 @@
     # - name: "List NodeJS processes [document-microservice]"
     #   community.docker.docker_container_exec:
     #     container: document-microservice
-    #     command: forever list
+    #     command: forever list #  #forever start ./server.js # hob # &
     #   register: forever_list
     #   changed_when: false
+
     - name: Start [document-microservice]
       community.docker.docker_container_exec:
         container: document-microservice
-        command: npm start #forever start ./server.js
+        command: npm start
       register: stdout
     - debug: var=stdout
 
-    - name: Install packages [vhostbackup]
+    - name: Post-jobs [document-microservice]
       community.docker.docker_container_exec:
-        container: vhostbackup
-        command: pip3 install flask-restful docker pyyaml
-
-    - name: Startup successful [startup & vhostbackup]
-      community.docker.docker_container_exec:
-        container: vhostbackup
-        command: nohup python /tmp/server.py & echo "Successfully started up!"
+        container: document-microservice
+        command: npm doctor

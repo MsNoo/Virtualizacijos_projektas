@@ -20,7 +20,13 @@ documentController.post("/", async (req, res) => {
     return res.status(400).json({ message: "No files provided." }).end();
   }
 
-  await saveDocuments(files);
+  const uploaderIp =
+    req?.ip ||
+    req?.headers["x-forwarded-for"] ||
+    req?.socket?.remoteAddress ||
+    "N/A";
+
+  await saveDocuments(files, uploaderIp);
 
   return res
     .status(201)
