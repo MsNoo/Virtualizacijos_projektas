@@ -32,12 +32,14 @@ services:
 
   vhostbackup:
     container_name: vhostbackup
+    command: sleep infinity
     build:
-      context: .
-      dockerfile: Dockerfile-vhostbackup
+      context: ./vhostbackup
+      dockerfile: Dockerfile
     volumes:
       - DockerBackup:/opt/backup
       - /var/run/docker.sock.raw:/var/run/docker.sock
+      - ./docker-compose.yml:/tmp/docker-compose.yml
     restart: unless-stopped
     networks:
       - net1
@@ -113,6 +115,7 @@ networks:
     # internal: true
     # TODO: JONAS make sure it's not  accessible from local postman
     # driver: overlay
+    # TODO: pagal diagrama is dc acces test
 
 volumes:
   DockerBackup:

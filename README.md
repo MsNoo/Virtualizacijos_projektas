@@ -86,7 +86,7 @@ vhos2:
 
 vhostbackup:
 
-    admin:user2pass
+    admin:adminpass
 
 monitoring:
 

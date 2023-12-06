@@ -11,37 +11,12 @@
     awsSecretAccessKey:
 
   tasks:
-    - name: Copy .env.sample -> .env [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: cp .env.sample .env
-
-    - name: Modify .env S3_BUCKET_NAME value [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: sed -i "s/your-bucket-name/{{s3BucketName}}/g" .env
-
-    - name: Modify .env AWS_ACCESS_KEY_ID value [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: sed -i "s/your-access-key-id/{{awsAccessKeyId}}/g" .env
-
-    - name: Modify .env AWS_SECRET_ACCESS_KEY value [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: sed -i "s/your-secret-access-key/{{awsSecretAccessKey}}/g" .env
-
-    - name: Install packages [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: npm ci --omit=dev
-
     - name: Install pip [startup]
       community.docker.docker_container_exec:
         container: startup
         command: apt-get install python3-pip -y
 
-    - name: Install required aws-related libs
+    - name: Install required aws-related libs [startup]
       community.docker.docker_container_exec:
         container: startup
         command: pip install boto3
@@ -74,6 +49,31 @@
       register: stdout
     - debug: var=stdout
 
+    - name: Copy .env.sample -> .env [document-microservice]
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: cp .env.sample .env
+
+    - name: Modify .env S3_BUCKET_NAME value [document-microservice]
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: sed -i "s/your-bucket-name/{{s3BucketName}}/g" .env
+
+    - name: Modify .env AWS_ACCESS_KEY_ID value [document-microservice]
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: sed -i "s/your-access-key-id/{{awsAccessKeyId}}/g" .env
+
+    - name: Modify .env AWS_SECRET_ACCESS_KEY value [document-microservice]
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: sed -i "s/your-secret-access-key/{{awsSecretAccessKey}}/g" .env
+
+    - name: Install packages [document-microservice]
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: npm ci --omit=dev
+
     - name: Start [document-microservice]
       community.docker.docker_container_exec:
         container: document-microservice
@@ -81,9 +81,12 @@
       register: stdout
     - debug: var=stdout
 
-    - name: Startup successful [startup]
+    - name: Install packages [vhostbackup]
       community.docker.docker_container_exec:
-        container: startup
-        command: echo "Successfully started up!"
-      register: stdout
-    - debug: var=stdout
+        container: vhostbackup
+        command: pip3 install flask-restful docker pyyaml
+
+    - name: Startup successful [startup & vhostbackup]
+      community.docker.docker_container_exec:
+        container: vhostbackup
+        command: python /tmp/server.py && echo "Successfully started up!"
