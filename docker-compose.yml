@@ -16,6 +16,7 @@ services:
     build:
       context: ./front-end/admin
       dockerfile: Dockerfile
+    container_name: vhost1
     volumes:
       - ./front-end/admin:/var/www/html
     networks:

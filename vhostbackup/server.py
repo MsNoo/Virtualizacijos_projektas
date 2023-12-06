@@ -1,10 +1,11 @@
 # Server used for managing backups and restores
 # 
-# To view backups access: http://vhostbackup.localhost/
+# To view backups access or call: http://vhostbackup.localhost/
 # To create a backup access: http://vhostbackup.localhost/backup
 # To restore a backup access: http://vhostbackup.localhost/restore
 # Example: http://vhostbackup.localhost/restore?ID=20231126143610896993&timestamp=2023-11-26%2014:36:10&list=vhost1,vhost2,api
 # To view current backup config: http://vhostbackup.localhost/getConfig
+# To set default backup config: http://vhostbackup.localhost/setDefaultConfig
 # To change (override) current backup config: http://vhostbackup.localhost/setConfig
 # Example: http://vhostbackup.localhost/setConfig?ContainerList=vhost1,vhost2,api&ContainerExceptionList=caddy,vhostbackup
 
@@ -41,11 +42,33 @@ def getBackupsRestoreLogs():
         logFile = open("/opt/backup/backupRestoreLog.txt", "r")
         fileOpened = True
     except:
-        responseText = statusCodeToJSON("404","Log file was not found! Please create first backup.")
+        responseText = "Log file was not found! Please create first backup."
 
     if(fileOpened):
-        responseText = logFile.read()
+        # Start the HTML table
+        responseText = "<table>"
+
+        for line in logFile:
+            # Performs transformation from JSON to more user friendly format
+            lineElements = json.loads(line)
+
+            # Add the headers if it's the first line
+            if responseText == "<table>":
+                responseText += "<tr>"
+                for key in lineElements.keys():
+                    responseText += f"<th>{key}</th>"
+                responseText += "</tr>"
+
+            # Add the data
+            responseText += "<tr>"
+            for value in lineElements.values():
+                responseText += f"<td>{value}</td>"
+            responseText += "</tr>"
+
+        # End the HTML table
+        responseText += "</table>"
         logFile.close()
+
 
     return jsonify(data=responseText)
 
@@ -139,7 +162,7 @@ def setConfig(containerList, containerExceptionList):
         "ID": str(configChangeID),
         "Type": "BACKUP CONFIG CHANGE",
         "Status": str(outcome),
-        "StatusReason": "Changed to: " + str(configData),
+        "StatusReason": "Container list: " + str(containerList) + " Exception list: " + str(containerExceptionList),
         "Started": str(startTimestamp),
         "Completed": str(getDate())
     }
@@ -165,16 +188,15 @@ def backupContainers(backupID, timestamp):
         return 0
 
     for name in containerList:
-        try:
-            container = client.containers.get(name)
-            tag = str(timestamp).replace(" ", "").replace("-", "").replace(":", "")
-            image = container.commit(repository="dockerbackup_"+name, tag=tag, message=str(backupID))
-            with open(os.path.join(volumepath, f"{backupID}_{name.upper()}.tar"), 'wb') as f:
-                for chunk in image.save(chunk_size=2048):
-                    f.write(chunk)
-            completedSteps += 1
-        except:
-            return 0
+        
+        container = client.containers.get(name)
+        tag = str(timestamp).replace(" ", "").replace("-", "").replace(":", "")
+        image = container.commit(repository="dockerbackup_"+name, tag=tag, message=str(backupID))
+        with open(os.path.join(volumepath, f"{backupID}_{name.upper()}.tar"), 'wb') as f:
+            for chunk in image.save(chunk_size=2048):
+                f.write(chunk)
+        completedSteps += 1
+   
 
     return completedSteps
 
@@ -394,6 +416,22 @@ def backupSetConfig():
         else:
             return statusCodeToJSON("500","Failed to write new configurion")
 
+# This code is executed once http://vhostbackup.localhost/setDefaultConfig is called
+@app.route('/setDefaultConfig', methods = ['GET'])
+def backupSetDefaultConfig():
+    if(request.method == 'GET'):
+        #containerList = "vhost1,vhost2,monitoring,startup,document-microservice,database"
+        containerList = "vhost2,document-microservice,database"
+        containerExceptionList = "caddy,vhostbackup"
+
+        if(containerList == None or containerExceptionList == None):
+            return statusCodeToJSON("400","Missing required parameters")
+
+        getConfigResponse = setConfig(containerList, containerExceptionList)
+        if(getConfigResponse):
+            return statusCodeToJSON("200","")
+        else:
+            return statusCodeToJSON("500","Failed to write new configurion")
 
 
 if __name__ == '__main__':
