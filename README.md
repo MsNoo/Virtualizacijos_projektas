@@ -16,59 +16,6 @@ Run `colima start` if docker daemon is causing issues on unix.
 docker-compose up --force-recreate --build -d
 ```
 
-docker compose -d
-
-TODO: situs i notes perkelt is cia
-
-removing all the exited containers
-
-docker rm $(docker ps -a -f status=exited -q)
-
-# full cleanup
-
-docker system prune -y
-
-# stop all containers
-
-docker ps -a --format="{{.ID}}" | \
- xargs docker update --restart=no | \
- xargs docker stop && (docker rm $(docker ps -q) -f || echo 'Cannot stop.') &&
-docker-compose up --force-recreate --build -d &&
-docker-compose exec startup bash
-
-# zsh alias: dce - docker-compose exec
-
-# remove container volumes
-
-docker-compose down --volumes
-
-# delete all containers
-
-docker rm $(docker ps -q) -f
-
-# cache troubleshooting 2
-
-https://stackoverflow.com/a/32618288
-
-# connect to the container's CLI
-
-docker-compose exec startup bash
-
-cd /opt
-cat playbook.yml
-... edit a file locally without stopping container
-
-cat playbook.yml
-... new values are visible
-
-# quit
-
-exit
-
-# change docker-compose.yml, reopen
-
-docker-compose up -d
-
 ### Testavimas
 
 - Happy path:

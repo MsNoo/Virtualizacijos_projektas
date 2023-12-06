@@ -82,8 +82,8 @@ services:
       - 5001:5001
     networks:
       - net3
-      - documentms-network
       - net2
+      - documentms-network
   startup:
     container_name: startup
     command: ansible-playbook /opt/playbook.yml
@@ -111,7 +111,11 @@ networks:
   net1:
   net2:
   net3:
+    driver: overlay
+    internal: true
   documentms-network:
+    driver: overlay
+    internal: true
 
 volumes:
   DockerBackup:
