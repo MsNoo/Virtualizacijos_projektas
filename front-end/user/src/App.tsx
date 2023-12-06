@@ -67,14 +67,13 @@ export const App: FC = () => {
     >
       <header>
         <h1 id="header-title" aria-label="file sharing site title">
-          Slaptoji Failų Talpykla
+          Slaptoji dokumentų saugykla
         </h1>
       </header>
 
       <main id="view-container">
         <h2 id="subtitle">
-          Mažinkite bendruomenės išlaidas dalindamiesi elektroninėje erdvėje su
-          elitiniais nariais!
+          Saugokime gamtą dalindamiesi dokumentais elektroninėje erdvėje
         </h2>
 
         <input
