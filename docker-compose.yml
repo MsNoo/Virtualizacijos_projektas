@@ -67,8 +67,6 @@ services:
       - 5432
     networks:
       - net3
-      - net1
-      - net2
       - documentms-network
 
   document-microservice:
@@ -85,7 +83,6 @@ services:
     networks:
       - net3
       - documentms-network
-      - net1
       - net2
   startup:
     container_name: startup
