@@ -1,8 +1,8 @@
-import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 
+import { getDocuments, saveDocument } from "./db.service.js";
 import { getS3Client, uploadFile } from "./s3.service.js";
-import { getDocuments } from "./db.service.js";
 
 export const saveDocuments = async (files) => {
   const s3Client = getS3Client("us-west-2");
@@ -42,6 +42,8 @@ export const getSignedDocuments = async () => {
         });
 
         const url = await getSignedUrl(s3Client, command, { expiresIn: 7_200 });
+
+        // await saveDocument();
 
         return {
           ...document,

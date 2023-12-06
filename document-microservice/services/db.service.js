@@ -5,19 +5,24 @@ const tempDb = {
   documents: [],
 };
 
-export const getDocuments = async () => {
-  const client = new Client({
+const getDbClient = () => {
+  return new Client({
     user: "postgres",
     database: "document-database",
     port: 5432,
+    // TODO:  ne localhost o db url
     host: "127.0.0.1",
     password: "university",
     ssl: false,
   });
+};
 
-  await client.connect();
+export const getDocuments = async () => {
+  const client = getDbClient();
 
   try {
+    await client.connect();
+
     const res = await client.query("select * from documents      ");
 
     console.info(res.rows);
@@ -26,6 +31,23 @@ export const getDocuments = async () => {
   } finally {
     await client.end();
   }
-  // TODO: axios ne localhost o db url
   return tempDb;
+};
+
+export const saveDocument = async (files) => {
+  const client = getDbClient();
+
+  try {
+    await client.connect();
+
+    const res = await client.query(
+      "INSERT INTO documents (uploader_ip, name, size) VALUES ('12.42.13.15', 'aws_guide.pdf',44242);"
+    );
+
+    return res;
+  } catch (err) {
+    console.error(err);
+  } finally {
+    await client.end();
+  }
 };

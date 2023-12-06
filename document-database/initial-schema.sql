@@ -11,12 +11,12 @@ CREATE TABLE documents (
    name VARCHAR(255) NOT NULL,
    uploader_ip VARCHAR(255) NOT NULL,
    size INT  NOT NULL
-)
+);
 
 CREATE TABLE users (
    id SERIAL PRIMARY KEY,
    name VARCHAR(255) NOT NULL,
    last_access_ip VARCHAR(255) NOT NULL,
    size INT  NOT NULL
-)
+);
 
