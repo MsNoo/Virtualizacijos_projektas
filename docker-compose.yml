@@ -28,7 +28,7 @@ services:
       dockerfile: Dockerfile
     networks:
       - net2
-      - documentms-network
+      - net4
 
   vhostbackup:
     container_name: vhostbackup
@@ -67,7 +67,7 @@ services:
       - 5432
     networks:
       - net3
-      - documentms-network
+      - net4
 
   document-microservice:
     container_name: document-microservice
@@ -83,7 +83,7 @@ services:
     networks:
       - net3
       - net2
-      - documentms-network
+      - net4
   startup:
     container_name: startup
     command: ansible-playbook /opt/playbook.yml
@@ -111,11 +111,11 @@ networks:
   net1:
   net2:
   net3:
-    driver: overlay
-    internal: true
-  documentms-network:
-    driver: overlay
-    internal: true
+    #driver: overlay
+    #internal: true
+  net4:
+    #driver: overlay
+    #internal: true
 
 volumes:
   DockerBackup:
