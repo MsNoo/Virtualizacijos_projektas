@@ -2,6 +2,7 @@
 - name: Main playbook
   hosts: localhost
   gather_facts: true
+  strategy: ansible.builtin.free
 
   vars:
     s3BucketName: "dev0-document-storage"
@@ -74,12 +75,24 @@
         container: document-microservice
         command: npm ci --omit=dev
 
+    - name: "Install forever [document-microservice]"
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: npm i -g forever
+
+    - name: "List NodeJS processes [document-microservice]"
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: forever list
+      register: forever_list
+      changed_when: false
+
     - name: Start [document-microservice]
       community.docker.docker_container_exec:
         container: document-microservice
-        command: npm start &
+        command: forever start ./server.js
       register: stdout
-    - debug: var=stdout
+      poll: 0
 
     - name: Install packages [vhostbackup]
       community.docker.docker_container_exec:
@@ -89,4 +102,4 @@
     - name: Startup successful [startup & vhostbackup]
       community.docker.docker_container_exec:
         container: vhostbackup
-        command: python /tmp/server.py && echo "Successfully started up!"
+        command: nohup python /tmp/server.py & echo "Successfully started up!"

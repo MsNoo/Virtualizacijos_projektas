@@ -12,7 +12,6 @@
     <p id="temporary-data-text"></p>
   </body>
 
-  <!-- TODO: mui DataGrid? -->
   <script>
     const textElement = document.querySelector("#temporary-data-text");
 
@@ -20,8 +19,7 @@
 
     fetch("http://vhostbackup.localhost/", {
       headers: {
-        // TODO: ne hardcoded o is inputu auth paimt
-        // TODO: caddy basic auth isjungt jei path yra vhost1
+        // alternatyviai ne hardcoded o is inputu auth paimt caddy basic auth isjungt jei path yra vhost1
         Authorization: "Basic YWRtaW46YWRtaW5wYXNz",
       },
     })

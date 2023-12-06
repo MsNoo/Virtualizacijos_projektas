@@ -1,3 +1,6 @@
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
 import { getS3Client, uploadFile } from "./s3.service.js";
 import { getDocuments } from "./db.service.js";
 
@@ -24,4 +27,30 @@ export const saveDocuments = async (files) => {
   }
 
   // TODO: save to table
+};
+
+export const getSignedDocuments = async () => {
+  const s3Client = getS3Client("us-west-2");
+  const { documents } = getDocuments();
+  try {
+    const signedDocuments = Promise.all(
+      documents.map(async (document) => {
+        const command = new GetObjectCommand({
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: document.name,
+        });
+
+        const url = await getSignedUrl(s3Client, command, { expiresIn: 7_200 });
+
+        return {
+          ...document,
+          url,
+        };
+      })
+    );
+
+    return { signedDocuments };
+  } catch (error) {
+    throw Error(error);
+  }
 };

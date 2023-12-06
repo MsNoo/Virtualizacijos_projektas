@@ -9,7 +9,7 @@ export const getDocuments = async () => {
     )
     .then((res) => {
       if (!Array.isArray(res.data.documents)) {
-        throw new Error(`Documents are not an array: ${res.data.documents}.`);
+        return [];
       }
 
       return res.data.documents;

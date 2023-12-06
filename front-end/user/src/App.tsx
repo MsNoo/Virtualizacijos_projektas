@@ -12,7 +12,6 @@ import {
 } from "./utils";
 import { documentGridColumns } from "./utils/documentGridColumns";
 
-// export/docker env var AWS auth -> leis naudot aws-sdk -> expresse s3 upload endpointai -> fronta subuildint ir delete react dir kad tiesiog axiosas butu ir rodytu updated + delete mygtuka
 export const App: FC = () => {
   const [_documents, setDocuments] = useState<any[]>([]);
   const [_isLoading, setIsLoading] = useState<boolean>(false);
@@ -61,7 +60,6 @@ export const App: FC = () => {
   };
 
   useEffect(() => {
-    // TODO: nginx reverse to use http://api https://stackoverflow.com/a/77060234
     refreshDocuments();
   }, []);
 
@@ -83,10 +81,10 @@ export const App: FC = () => {
         </h2>
 
         <input
-          onChange={handleInputChange}
-          id="file-upload-input"
           type="file"
+          onChange={handleInputChange}
           multiple
+          id="file-upload-input"
         />
 
         <section id="documents-list">

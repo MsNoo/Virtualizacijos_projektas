@@ -14,7 +14,7 @@ export const getS3Client = (region = "us-west-2") => {
 
 export const uploadFile = async (file, name, bucket, client) => {
   const { mimetype, buffer } = file;
-  //   console.info({ file });
+
   try {
     const s3Upload = new Upload({
       client,
@@ -26,10 +26,12 @@ export const uploadFile = async (file, name, bucket, client) => {
         Key: name,
       },
     });
-    console.info("uploading");
+
+    console.info("Uploading file...");
 
     const res = await s3Upload.done();
-    console.info("success in upload");
+
+    console.info("Success in uploading.");
 
     return res;
   } catch (error) {
