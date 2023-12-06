@@ -32,6 +32,7 @@ export const saveDocuments = async (files) => {
 export const getSignedDocuments = async () => {
   const s3Client = getS3Client("us-west-2");
   const { documents } = getDocuments();
+
   try {
     const signedDocuments = Promise.all(
       documents.map(async (document) => {

@@ -87,12 +87,10 @@ services:
     build:
       context: ./startup
       dockerfile: Dockerfile
-    volumes: # TODO: ensure all these volumes are required
+    volumes:
       - ./startup:/opt
       - /var/run/docker.sock:/var/run/docker.sock
-      - //var/run/docker.sock:/var/run/docker.sock
       - /var/run/docker.sock.raw:/var/run/docker.sock
-      - //var/run/docker.sock.raw:/var/run/docker.sock
     depends_on:
       - database
       - document-microservice
@@ -101,7 +99,7 @@ services:
       - vhostbackup
       - caddy
       - monitoring
-    networks: # TODO: ensure both of these networks are required
+    networks:
       - net1
       - net2
       - net3
@@ -110,6 +108,7 @@ networks:
   net1:
   net2:
   net3:
+
   # accessible by vhost1 & vhost2, but not by outside or by caddy
   documentms-network:
     # internal: true
