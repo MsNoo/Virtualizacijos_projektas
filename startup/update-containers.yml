@@ -1,0 +1,14 @@
+- name: Update [startup]
+  community.docker.docker_container_exec:
+    container: startup
+    command: apt-get update -y
+
+- name: Update [document-microservice]
+  community.docker.docker_container_exec:
+    container: document-microservice
+    command: apt-get update -y
+
+- name: Update [monitoring]
+  community.docker.docker_container_exec:
+    container: monitoring
+    command: apt-get update -y

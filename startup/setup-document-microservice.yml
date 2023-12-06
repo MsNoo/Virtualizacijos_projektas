@@ -1,0 +1,42 @@
+- name: Copy .env.sample -> .env [document-microservice]
+  community.docker.docker_container_exec:
+    container: document-microservice
+    command: cp .env.sample .env
+
+- name: Modify .env S3_BUCKET_NAME value [document-microservice]
+  community.docker.docker_container_exec:
+    container: document-microservice
+    command: sed -i "s/your-bucket-name/{{s3BucketName}}/g" .env
+
+- name: Modify .env AWS_ACCESS_KEY_ID value [document-microservice]
+  community.docker.docker_container_exec:
+    container: document-microservice
+    command: sed -i "s/your-access-key-id/{{awsAccessKeyId}}/g" .env
+
+- name: Modify .env AWS_SECRET_ACCESS_KEY value [document-microservice]
+  community.docker.docker_container_exec:
+    container: document-microservice
+    command: sed -i "s/your-secret-access-key/{{awsSecretAccessKey}}/g" .env
+
+- name: Install packages [document-microservice]
+  community.docker.docker_container_exec:
+    container: document-microservice
+    command: npm ci --omit=dev
+
+# - name: "Install forever [document-microservice]"
+#   community.docker.docker_container_exec:
+#     container: document-microservice
+#     command: npm i -g forever
+# - name: "List NodeJS processes [document-microservice]"
+#   community.docker.docker_container_exec:
+#     container: document-microservice
+#     command: forever list #  #forever start ./server.js # hob # &
+#   register: forever_list
+#   changed_when: false
+
+- name: Start [document-microservice]
+  community.docker.docker_container_exec:
+    container: document-microservice
+    command: npm start
+  register: stdout
+- debug: var=stdout

@@ -7,34 +7,15 @@
     s3BucketName: "dev0-document-storage"
 
     # AWS credentials are sensitive and should not be committed - preferably fetched from SecretsManager or passed to ansible
-    awsAccessKeyId:
-    awsSecretAccessKey:
+    awsAccessKeyId: AKIASLBVYQRNJ6TGXO6H
+    awsSecretAccessKey: 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
 
   tasks:
-    - name: Install pip [startup]
-      community.docker.docker_container_exec:
-        container: startup
-        command: apt-get install python3-pip -y
+    - name: Update all containers
+      ansible.builtin.import_tasks: update-containers.yml
 
-    - name: Install required aws-related libs [startup]
-      community.docker.docker_container_exec:
-        container: startup
-        command: pip install boto3
-
-    - name: Update apt cache [startup]
-      community.docker.docker_container_exec:
-        container: startup
-        command: apt-get update
-
-    # Should read from SecretsManager or environment variable
-    - name: Set AWS credentials & config
-      shell: |
-        mkdir -p /root/.aws
-        echo "[default]
-        aws_access_key_id = {{awsAccessKeyId}}
-        aws_secret_access_key = {{awsSecretAccessKey}}" > /root/.aws/credentials
-        echo "[default]
-        region = us-west-2" > /root/.aws/config
+    - name: Provision S3 credentials
+      ansible.builtin.import_tasks: provision-document-s3-credentials.yml
 
     - name: Create S3 bucket for document storage
       amazon.aws.s3_bucket:
@@ -49,48 +30,8 @@
       register: stdout
     - debug: var=stdout
 
-    - name: Copy .env.sample -> .env [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: cp .env.sample .env
-
-    - name: Modify .env S3_BUCKET_NAME value [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: sed -i "s/your-bucket-name/{{s3BucketName}}/g" .env
-
-    - name: Modify .env AWS_ACCESS_KEY_ID value [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: sed -i "s/your-access-key-id/{{awsAccessKeyId}}/g" .env
-
-    - name: Modify .env AWS_SECRET_ACCESS_KEY value [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: sed -i "s/your-secret-access-key/{{awsSecretAccessKey}}/g" .env
-
-    - name: Install packages [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: npm ci --omit=dev
-
-    # - name: "Install forever [document-microservice]"
-    #   community.docker.docker_container_exec:
-    #     container: document-microservice
-    #     command: npm i -g forever
-    # - name: "List NodeJS processes [document-microservice]"
-    #   community.docker.docker_container_exec:
-    #     container: document-microservice
-    #     command: forever list #  #forever start ./server.js # hob # &
-    #   register: forever_list
-    #   changed_when: false
-
-    - name: Start [document-microservice]
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: npm start
-      register: stdout
-    - debug: var=stdout
+    - name: Setup document microservice
+      ansible.builtin.import_tasks: setup-document-microservice.yml
 
     - name: Post-jobs [document-microservice]
       community.docker.docker_container_exec:
