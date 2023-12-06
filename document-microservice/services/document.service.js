@@ -6,27 +6,19 @@ import { getS3Client, uploadFile } from "./s3.service.js";
 
 export const saveDocuments = async (files) => {
   const s3Client = getS3Client("us-west-2");
-  const { documents } = await getDocuments();
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-
-    const uploadedFile = await uploadFile(
+  for (const file of files) {
+    await uploadFile(
       file,
       file.originalname,
       process.env.S3_BUCKET_NAME,
       s3Client
     );
 
-    documents.push({
-      id: documents.length + i,
-      urlKey: uploadedFile.Key,
-      name: file.originalname,
-      size: file.size || file?.buffer?.bytelength || file?.buffer?.length,
-    });
+    await saveDocument();
   }
 
-  // TODO: save to table
+  console.info(`Added ${Object.keys(files).length} documents.`);
 };
 
 export const getSignedDocuments = async () => {
@@ -34,7 +26,7 @@ export const getSignedDocuments = async () => {
   const { documents } = await getDocuments();
 
   try {
-    const signedDocuments = Promise.all(
+    const signedDocuments = await Promise.all(
       documents.map(async (document) => {
         const command = new GetObjectCommand({
           Bucket: process.env.S3_BUCKET_NAME,
@@ -42,8 +34,6 @@ export const getSignedDocuments = async () => {
         });
 
         const url = await getSignedUrl(s3Client, command, { expiresIn: 7_200 });
-
-        // await saveDocument();
 
         return {
           ...document,

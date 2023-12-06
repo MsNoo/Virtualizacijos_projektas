@@ -13,9 +13,9 @@ import {
 import { documentGridColumns } from "./utils/documentGridColumns";
 
 export const App: FC = () => {
-  const [_documents, setDocuments] = useState<any[]>([]);
+  const [_documents, setDocuments] = useState<TDocument[]>([]);
   const [_isLoading, setIsLoading] = useState<boolean>(false);
-  const [_selectedDocuments, setSelectedDocuments] = useState<TDocument[]>([]);
+  const [_selectedDocuments, setSelectedDocuments] = useState<File[]>([]);
   const _credits = getCredits();
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +27,7 @@ export const App: FC = () => {
     ]);
   };
 
-  const handleRemoveSelectedDocument = (document: TDocument) => {
+  const handleRemoveSelectedDocument = (document: File) => {
     setSelectedDocuments((prevSelectedDocuments) =>
       prevSelectedDocuments.filter(
         (prevSelectedDocument) => prevSelectedDocument.name !== document.name

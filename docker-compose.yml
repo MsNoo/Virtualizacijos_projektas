@@ -65,9 +65,12 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - 5432
     networks:
       - net3
+      - net1
+      - net2
+      - documentms-network
 
   document-microservice:
     container_name: document-microservice
@@ -79,11 +82,12 @@ services:
       - ./document-microservice:/app
     restart: unless-stopped
     ports:
-      - "5001:5001"
+      - 5001:5001
     networks:
       - net3
       - documentms-network
-
+      - net1
+      - net2
   startup:
     container_name: startup
     command: ansible-playbook /opt/playbook.yml
@@ -111,13 +115,13 @@ networks:
   net1:
   net2:
   net3:
+  documentms-network:
 
   # accessible by vhost1 & vhost2, but not by outside or by caddy
-  documentms-network:
-    # internal: true
-    # TODO: JONAS make sure it's not  accessible from local postman
-    # driver: overlay
-    # TODO: pagal diagrama is dc acces test
+  # internal: true
+  # TODO: JONAS make sure it's not  accessible from local postman
+  # driver: overlay
+  # TODO: pagal diagrama is dc acces test
 
 volumes:
   DockerBackup:
