@@ -1,6 +1,7 @@
 import { type FC, type ChangeEvent, useState, useEffect } from "react";
 import { DataGrid, GridDeleteIcon } from "@mui/x-data-grid";
-import { Button, IconButton } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
+import { IconButton } from "@mui/material";
 
 import type { TDocument } from "./types";
 import {
@@ -11,11 +12,10 @@ import {
 } from "./utils";
 import { documentGridColumns } from "./utils/documentGridColumns";
 
-// export/docker env var AWS auth -> leis naudot aws-sdk -> expresse s3 upload endpointai -> fronta subuildint ir delete react dir kad tiesiog axiosas butu ir rodytu updated + delete mygtuka
-// TODO: vu docker: data storage
 export const App: FC = () => {
-  const [_documents, setDocuments] = useState<any[]>([]);
-  const [_selectedDocuments, setSelectedDocuments] = useState<TDocument[]>([]);
+  const [_documents, setDocuments] = useState<TDocument[]>([]);
+  const [_isLoading, setIsLoading] = useState<boolean>(false);
+  const [_selectedDocuments, setSelectedDocuments] = useState<File[]>([]);
   const _credits = getCredits();
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +27,7 @@ export const App: FC = () => {
     ]);
   };
 
-  const handleRemoveSelectedDocument = (document: TDocument) => {
+  const handleRemoveSelectedDocument = (document: File) => {
     setSelectedDocuments((prevSelectedDocuments) =>
       prevSelectedDocuments.filter(
         (prevSelectedDocument) => prevSelectedDocument.name !== document.name
@@ -48,7 +48,11 @@ export const App: FC = () => {
       formData.append("files", document);
     });
 
+    setIsLoading(true);
+
     await uploadDocuments(formData);
+
+    setIsLoading(false);
 
     setSelectedDocuments([]);
 
@@ -56,7 +60,6 @@ export const App: FC = () => {
   };
 
   useEffect(() => {
-    // TODO: nginx reverse to use http://api https://stackoverflow.com/a/77060234
     refreshDocuments();
   }, []);
 
@@ -77,10 +80,10 @@ export const App: FC = () => {
         </h2>
 
         <input
-          onChange={handleInputChange}
-          id="file-upload-input"
           type="file"
+          onChange={handleInputChange}
           multiple
+          id="file-upload-input"
         />
 
         <section id="documents-list">
@@ -99,9 +102,13 @@ export const App: FC = () => {
           ))}
 
           {_selectedDocuments.length ? (
-            <Button variant="outlined" onClick={handleSelectedDocumentsUpload}>
+            <LoadingButton
+              onClick={handleSelectedDocumentsUpload}
+              loading={_isLoading}
+              variant="outlined"
+            >
               Upload
-            </Button>
+            </LoadingButton>
           ) : null}
         </section>
 

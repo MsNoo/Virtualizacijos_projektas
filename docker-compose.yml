@@ -12,6 +12,7 @@ services:
       - net2
 
   vhost1:
+    container_name: vhost1
     build:
       context: ./front-end/admin
       dockerfile: Dockerfile
@@ -20,36 +21,36 @@ services:
       - ./front-end/admin:/var/www/html
     networks:
       - net1
-      - documentms-network
 
   vhost2:
+    container_name: vhost2
     build:
       context: ./front-end/user
       dockerfile: Dockerfile
-    container_name: vhost2
     networks:
       - net2
       - documentms-network
 
   vhostbackup:
+    container_name: vhostbackup
     build:
-      context: .
-      dockerfile: Dockerfile-vhostbackup
+      context: ./vhostbackup
+      dockerfile: Dockerfile
     volumes:
       - DockerBackup:/opt/backup
       - /var/run/docker.sock.raw:/var/run/docker.sock
-    container_name: vhostbackup
+      - ./docker-compose.yml:/tmp/docker-compose.yml
     restart: unless-stopped
     networks:
       - net1
 
   monitoring:
+    container_name: monitoring
     build:
       context: ./monitoring
       dockerfile: Dockerfile
     volumes:
       - /var/run/docker.sock.raw:/var/run/docker.sock
-    container_name: monitoring
     restart: unless-stopped
     networks:
       - net1
@@ -57,47 +58,52 @@ services:
     ports:
       - "8000:5000"
 
-  database:
-    container_name: database
-    command: sleep infinity
+  document-database:
+    container_name: document-database
     build:
-      context: ./database
+      context: ./document-database
       dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 5432
     networks:
       - net3
+      - documentms-network
 
   document-microservice:
+    container_name: document-microservice
+    command: sleep infinity
     build:
       context: ./document-microservice
       dockerfile: Dockerfile
-    container_name: document-microservice
+    volumes:
+      - ./document-microservice:/app
     restart: unless-stopped
     ports:
-      - "5001:5001"
+      - 5001:5001
     networks:
-      - documentms-network # document-microservice-network throws ECONNREFUSED
-
+      - net3
+      - net2
+      - documentms-network
   startup:
     container_name: startup
     command: ansible-playbook /opt/playbook.yml
     build:
       context: ./startup
       dockerfile: Dockerfile
-    volumes: # TODO: ensure all these volumes are required
+    volumes:
       - ./startup:/opt
       - /var/run/docker.sock:/var/run/docker.sock
-      - //var/run/docker.sock:/var/run/docker.sock
       - /var/run/docker.sock.raw:/var/run/docker.sock
-      - //var/run/docker.sock.raw:/var/run/docker.sock
     depends_on:
-      - database
+      - document-database
       - document-microservice
       - vhost1
       - vhost2
       - vhostbackup
       - caddy
       - monitoring
-    networks: # TODO: ensure both of these networks are required
+    networks:
       - net1
       - net2
       - net3
@@ -106,11 +112,11 @@ networks:
   net1:
   net2:
   net3:
-  # accessible by vhost1 & vhost2, but not by outside or by caddy
+    driver: overlay
+    internal: true
   documentms-network:
-    # internal: true
-    # TODO: JONAS make sure it's not  accessible from local postman
-    # driver: overlay
+    driver: overlay
+    internal: true
 
 volumes:
   DockerBackup:

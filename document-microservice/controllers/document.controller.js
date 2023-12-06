@@ -1,55 +1,35 @@
 import express from "express";
 
+import {
+  getSignedDocuments,
+  saveDocuments,
+} from "../services/document.service.js";
+
 export const documentController = express.Router();
 
-const tempDb = {
-  documents: [
-    {
-      id: 0,
-      url: "https:google.com",
-      name: "free-office.pdf",
-      size: 4942442,
-    },
-    {
-      id: 1,
-      url: "https:google.com",
-      name: "google-excel-hacks.docx",
-      size: 2222221942,
-    },
-    { id: 2, url: "https:google.com", name: "not-a-virus.sh", size: 19422 },
-  ],
-};
+documentController.get("/", async (_, res) => {
+  const documents = await getSignedDocuments();
 
-documentController.get("/", (_, res) => {
-  // TODO: GET S3 aws-sdk v3
-  return res.status(200).json(tempDb).end();
+  return res.status(200).json(documents).end();
 });
 
-documentController.post("/", (req, res) => {
+documentController.post("/", async (req, res) => {
   const files = req.files;
-
-  console.error(req.files);
-  console.error(req.body);
-
-  // get express request files
 
   if (!files) {
     return res.status(400).json({ message: "No files provided." }).end();
   }
 
-  const newFiles = files.map((file, i) => {
-    return {
-      id: tempDb.documents.length + i,
-      url: "s3 url bus",
-      name: file.originalname,
-      size: file.size || file?.buffer?.bytelength || file?.buffer?.length,
-    };
-  });
+  const uploaderIp =
+    req?.ip ||
+    req?.headers["x-forwarded-for"] ||
+    req?.socket?.remoteAddress ||
+    "N/A";
 
-  tempDb.documents.push(...newFiles);
+  await saveDocuments(files, uploaderIp);
 
   return res
-    .status(200)
-    .json({ message: "Successfully added documents" })
+    .status(201)
+    .json({ message: `Added ${Object.keys(files).length} documents.` })
     .end();
 });
