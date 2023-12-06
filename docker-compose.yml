@@ -111,11 +111,11 @@ networks:
   net1:
   net2:
   net3:
-    #driver: overlay
-    #internal: true
+    driver: overlay
+    internal: true
   net4:
-    #driver: overlay
-    #internal: true
+    driver: overlay
+    internal: true
 
 volumes:
   DockerBackup:
