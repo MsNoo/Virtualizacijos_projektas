@@ -11,7 +11,7 @@ export const saveDocuments = async (files) => {
     const uploadedFile = await uploadFile(
       file,
       file.originalname,
-      "dev-document-22222", // playbook.yml value
+      process.env.S3_BUCKET_NAME,
       s3Client
     );
 
@@ -22,4 +22,6 @@ export const saveDocuments = async (files) => {
       size: file.size || file?.buffer?.bytelength || file?.buffer?.length,
     });
   }
+
+  // TODO: save to table
 };

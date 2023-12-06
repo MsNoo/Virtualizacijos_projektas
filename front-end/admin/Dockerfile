@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM debian:12.2
 
 RUN apt update
 

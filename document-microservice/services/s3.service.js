@@ -5,6 +5,10 @@ export const getS3Client = (region = "us-west-2") => {
   return new S3Client({
     region,
     apiVersion: "2006-03-01",
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
   });
 };
 

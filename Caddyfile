@@ -51,3 +51,8 @@ http://monitoring.localhost {
     }
     reverse_proxy monitoring:5000
 }
+
+# decided not to keep it here as caddy is demilitarized zone
+#http://document-microservice.localhost {
+#    reverse_proxy document-microservice:5001
+#}

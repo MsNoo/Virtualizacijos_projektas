@@ -3,51 +3,52 @@
   hosts: localhost
   gather_facts: true
 
+  vars:
+    s3BucketName: "dev0-document-storage"
+
+    # AWS credentials are sensitive and should not be committed - preferably fetched from SecretsManager or passed to ansible
+    awsAccessKeyId:
+    awsSecretAccessKey:
+
   tasks:
-    - name: Start document-microservice
+    - name: Copy .env.sample -> .env [document-microservice]
       community.docker.docker_container_exec:
         container: document-microservice
-        command: ls ./
-      register: stdout
-    - debug: var=stdout
+        command: cp .env.sample .env
 
-    # - name: "[document-microservice] install nvm"
-    #   community.docker.docker_container_exec:
-    #     container: document-microservice
-    #     command: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-    #   register: stdout
-    # - debug: var=stdout
+    - name: Modify .env S3_BUCKET_NAME value [document-microservice]
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: sed -i "s/your-bucket-name/{{s3BucketName}}/g" .env
 
-    # - name: "[document-microservice] install node & npm"
-    #   community.docker.docker_container_exec:
-    #     container: document-microservice
-    #     command: nvm install node
+    - name: Modify .env AWS_ACCESS_KEY_ID value [document-microservice]
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: sed -i "s/your-access-key-id/{{awsAccessKeyId}}/g" .env
 
-    - name: Install document-microservice packages
+    - name: Modify .env AWS_SECRET_ACCESS_KEY value [document-microservice]
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: sed -i "s/your-secret-access-key/{{awsSecretAccessKey}}/g" .env
+
+    - name: Install packages [document-microservice]
       community.docker.docker_container_exec:
         container: document-microservice
         command: npm ci --omit=dev
 
-    - name: Start document-microservice
-      community.docker.docker_container_exec:
-        container: document-microservice
-        command: npm start
-      register: stdout
-    - debug: var=stdout
-
-    - name: Install pip
+    - name: Install pip [startup]
       community.docker.docker_container_exec:
         container: startup
         command: apt-get install python3-pip -y
 
-    - name: install required aws-related libs
+    - name: Install required aws-related libs
       community.docker.docker_container_exec:
         container: startup
         command: pip install boto3
 
-    - name: Update apt cache
+    - name: Update apt cache [startup]
       community.docker.docker_container_exec:
-        container: vhost1
+        container: startup
         command: apt-get update
 
     # Should read from SecretsManager or environment variable
@@ -55,14 +56,14 @@
       shell: |
         mkdir -p /root/.aws
         echo "[default]
-        aws_access_key_id = xxxx
-        aws_secret_access_key = xxxxxxx" > /root/.aws/credentials
+        aws_access_key_id = {{awsAccessKeyId}}
+        aws_secret_access_key = {{awsSecretAccessKey}}" > /root/.aws/credentials
         echo "[default]
         region = us-west-2" > /root/.aws/config
 
     - name: Create S3 bucket for document storage
       amazon.aws.s3_bucket:
-        name: dev-document-222223
+        name: "{{s3BucketName}}"
         region: us-west-2
         state: present
         encryption: "AES256"
@@ -70,45 +71,19 @@
           block_public_acls: true
           block_public_policy: true
           ignore_public_acls: true
-      register: url_output
-    - debug: var=stdd
-    # - name: Install additional binaries
-    #   community.docker.docker_container_exec:
-    #     container: vhost1
-    #     command: apt-get install sed wget curl unzip -y
-    #   register: result
-    # - name: Download WordPress
-    #   community.docker.docker_container_exec:
-    #     container: vhost1
-    #     command: wget -O  /tmp/latest.zip https://wordpress.org/latest.zip
-    #   register: result
-    # - name: Extract WordPress to /var/www/html
-    #   community.docker.docker_container_exec:
-    #     container: vhost1
-    #     command: unzip -o /tmp/latest.zip -d /var/www/html
-    # - name: Rename wp-config
-    #   community.docker.docker_container_exec:
-    #     container: vhost1
-    #     command: mv /var/www/html/wordpress/wp-config-sample.php /var/www/html/wordpress/wp-config.php
-    # This would be more secure with SecretsManager
-    # - name: Set database name
-    #   community.docker.docker_container_exec:
-    #     container: vhost1
-    #     command: sed -i "s/database_name_here/wordpress/g" /var/www/html/wordpress/wp-config.php
-    #   register: result
-    # - name: Set database username
-    #   community.docker.docker_container_exec:
-    #     container: vhost1
-    #     command: sed -i "s/username_here/wordpress/g" /var/www/html/wordpress/wp-config.php
-    # - name: Set database password
-    #   community.docker.docker_container_exec:
-    #     container: vhost1
-    #     command: sed -i "s/password_here/wordpress/g" /var/www/html/wordpress/wp-config.php
-    # - name: Set database host
-    #   community.docker.docker_container_exec:
-    #     container: vhost1
-    #     command: sed -i "s/localhost/database/g" /var/www/html/wordpress/wp-config.php
+      register: stdout
+    - debug: var=stdout
 
-    # - name: Status of document system deployment
-    # ansible.builtin.debug:
-    #   msg: "{{ result }}"
+    - name: Start [document-microservice]
+      community.docker.docker_container_exec:
+        container: document-microservice
+        command: npm start &
+      register: stdout
+    - debug: var=stdout
+
+    - name: Startup successful [startup]
+      community.docker.docker_container_exec:
+        container: startup
+        command: echo "Successfully started up!"
+      register: stdout
+    - debug: var=stdout

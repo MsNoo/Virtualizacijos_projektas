@@ -20,6 +20,14 @@ docker compose -d
 
 TODO: situs i notes perkelt is cia
 
+removing all the exited containers
+
+docker rm $(docker ps -a -f status=exited -q)
+
+# full cleanup
+
+docker system prune -y
+
 # stop all containers
 
 docker ps -a --format="{{.ID}}" | \

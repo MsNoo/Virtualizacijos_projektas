@@ -1,26 +1,26 @@
-FROM ubuntu:18.04
 FROM node:20 as build-stage
 
-# RUN apt update
+RUN apt update
 
-# WORKDIR /app
+WORKDIR /app
 
-# COPY ./src ./src
-# COPY ./public ./public
-# COPY ./package*.json .
-# COPY ./tsconfig.json .
+ENV REACT_APP_DOCUMENT_MICROSERVICE_URL=http://localhost:5001
 
-# RUN npm ci
+COPY ./src ./src
+COPY ./public ./public
+COPY ./package*.json .
+COPY ./tsconfig.json .
 
-# # imanoma buildint pries keliant i containeri, taciau nebutu 1:1 consistency
-# RUN sh -c 'npm run build' 
+RUN npm ci
 
-# FROM nginx:1.22.1-alpine as prod-stage
+RUN sh -c 'npm run build' 
 
-# COPY --from=build-stage /app/build /usr/share/nginx/html
+FROM nginx:1.22.1-alpine as prod-stage
 
-# EXPOSE 80 
+COPY --from=build-stage /app/build /usr/share/nginx/html
 
-# RUN sh -c "nginx -t"
+EXPOSE 80 
 
-# CMD ["nginx", "-g", "daemon off;"]
+RUN sh -c "nginx -t"
+
+CMD ["nginx", "-g", "daemon off;"]

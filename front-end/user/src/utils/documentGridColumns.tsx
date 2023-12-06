@@ -1,4 +1,4 @@
-import type { GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 
 import { getFormattedSize } from "./getFormattedSize";
 
@@ -8,8 +8,7 @@ export const documentGridColumns: GridColDef[] = [
     field: "size",
     headerName: "Size",
     width: 160,
-    valueGetter: (params: GridValueGetterParams) =>
-      getFormattedSize(params.row.size),
+    renderCell: (params) => getFormattedSize(params.row.size),
   },
   {
     field: "url",
