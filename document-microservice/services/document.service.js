@@ -6,7 +6,7 @@ import { getDocuments } from "./db.service.js";
 
 export const saveDocuments = async (files) => {
   const s3Client = getS3Client("us-west-2");
-  const { documents } = getDocuments();
+  const { documents } = await getDocuments();
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
@@ -31,7 +31,7 @@ export const saveDocuments = async (files) => {
 
 export const getSignedDocuments = async () => {
   const s3Client = getS3Client("us-west-2");
-  const { documents } = getDocuments();
+  const { documents } = await getDocuments();
 
   try {
     const signedDocuments = Promise.all(

@@ -38,6 +38,10 @@ docker-compose exec startup bash
 
 # zsh alias: dce - docker-compose exec
 
+# remove container volumes
+
+docker-compose down --volumes
+
 # delete all containers
 
 docker rm $(docker ps -q) -f
