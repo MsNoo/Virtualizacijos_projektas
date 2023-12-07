@@ -4,11 +4,11 @@
   strategy: ansible.builtin.free
 
   vars:
-    s3BucketName: "dev0-document-storage"
+    s3BucketName: "document-storage"
 
     # AWS credentials are sensitive and should not be committed - preferably fetched from SecretsManager or passed to ansible
-    awsAccessKeyId: AKIASLBVYQRNJ6TGXO6H
-    awsSecretAccessKey: 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
+    awsAccessKeyId:
+    awsSecretAccessKey:
 
   tasks:
     - name: Update all containers
